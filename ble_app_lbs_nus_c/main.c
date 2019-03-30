@@ -60,8 +60,11 @@
 #include "ble_advertising.h"
 #include "ble_conn_params.h"
 #include "ble_db_discovery.h"
+
 #include "ble_nus_c.h"
 #include "ble_lbs_c.h"
+#include "ble_image_transfer_service_c.h"
+
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_scan.h"
 #include "ble_conn_state.h"
@@ -121,12 +124,15 @@ NRF_BLE_GATT_DEF(m_gatt);                                       /**< GATT module
 
 BLE_NUS_C_ARRAY_DEF(m_ble_nus_c, NRF_SDH_BLE_CENTRAL_LINK_COUNT);
 BLE_LBS_C_ARRAY_DEF(m_ble_lbs_c, NRF_SDH_BLE_CENTRAL_LINK_COUNT);           /**< LED button client instances. */
+BLE_ITS_C_ARRAY_DEF(m_ble_its_c, NRF_SDH_BLE_CENTRAL_LINK_COUNT);          /**< BLE Nordic Image Transfer Service (ITS) client instance. */
+
 BLE_DB_DISCOVERY_ARRAY_DEF(m_db_disc, NRF_SDH_BLE_CENTRAL_LINK_COUNT);  /**< Database discovery module instances. */
 
 
 static uint16_t m_conn_handle          = BLE_CONN_HANDLE_INVALID;                   /**< Handle of the current connection. */
 
 static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - OPCODE_LENGTH - HANDLE_LENGTH; /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
+static uint16_t m_ble_its_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - OPCODE_LENGTH - HANDLE_LENGTH; /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 
 static char const m_target_periph_name[] = "LBS_NUS_Node";     /**< Name of the device we try to connect to. This name is searched in the scan report data*/
 
@@ -276,7 +282,7 @@ static void ble_nus_c_evt_handler(ble_nus_c_t * p_ble_nus_c, ble_nus_c_evt_t con
                 err_code = ble_nus_c_handles_assign(p_ble_nus_c, p_ble_nus_c_evt->conn_handle, &p_ble_nus_c_evt->handles);
                 APP_ERROR_CHECK(err_code);
 
-              
+
                 NRF_LOG_INFO("Before enable the tx notification");
                 NRF_LOG_HEXDUMP_DEBUG(p_ble_nus_c, sizeof(ble_nus_c_t));
                 err_code = ble_nus_c_tx_notif_enable(p_ble_nus_c);
@@ -346,6 +352,47 @@ static void lbs_c_evt_handler(ble_lbs_c_t * p_lbs_c, ble_lbs_c_evt_t * p_lbs_c_e
         }
 }
 
+static void ble_its_c_evt_handler(ble_its_c_t *p_ble_its_c, ble_its_c_evt_t const *p_ble_its_evt)
+{
+        ret_code_t err_code;
+        uint32_t receive_byte = 0;
+
+        switch (p_ble_its_evt->evt_type)
+        {
+        case BLE_ITS_C_EVT_DISCOVERY_COMPLETE:
+                NRF_LOG_INFO("ITS Service: Discovery complete.");
+                err_code = ble_its_c_handles_assign(p_ble_its_c, p_ble_its_evt->conn_handle, &p_ble_its_evt->handles);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("ble_its_c_tx_notif_enable.");
+                err_code = ble_its_c_tx_notif_enable(p_ble_its_c);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("ble_its_c_img_info_notif_enable.");
+                err_code = ble_its_c_img_info_notif_enable(p_ble_its_c);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("Connected to device with Nordic ITS Service.");
+                break;
+
+        case BLE_ITS_C_EVT_ITS_RX_EVT:
+                NRF_LOG_INFO("BLE_ITS_C_EVT_ITS_RX_EVT");
+                break;
+
+        case BLE_ITS_C_EVT_ITS_TX_EVT:
+                NRF_LOG_DEBUG("BLE_ITS_C_EVT_ITS_TX_EVT %04d", receive_byte);
+                break;
+
+        case BLE_ITS_C_EVT_ITS_IMG_INFO_EVT:
+                NRF_LOG_DEBUG("BLE_ITS_C_EVT_ITS_IMG_INFO_EVT %04d", receive_byte);
+                break;
+
+        case BLE_ITS_C_EVT_DISCONNECTED:
+                NRF_LOG_INFO("Disconnected.");
+                //scan_start();
+                break;
+        }
+}
 
 /**@brief Function for changing the tx power.
  */
@@ -382,6 +429,9 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                 APP_ERROR_CHECK(err_code);
 
                 err_code = ble_nus_c_handles_assign(&m_ble_nus_c[p_gap_evt->conn_handle], p_gap_evt->conn_handle, NULL);
+                APP_ERROR_CHECK(err_code);
+
+                err_code = ble_its_c_handles_assign(&m_ble_its_c[p_gap_evt->conn_handle], p_gap_evt->conn_handle, NULL);
                 APP_ERROR_CHECK(err_code);
 
                 err_code = ble_db_discovery_start(&m_db_disc[p_gap_evt->conn_handle], p_gap_evt->conn_handle);
@@ -539,6 +589,20 @@ static void lbs_c_init(void)
         }
         // err_code = ble_lbs_c_init(&m_ble_lbs_c, &lbs_c_init_obj);
         // APP_ERROR_CHECK(err_code);
+}
+
+
+static void its_c_init(void)
+{
+        ret_code_t err_code;
+        ble_its_c_init_t its_init;
+
+        its_init.evt_handler = ble_its_c_evt_handler;
+        for (uint32_t i = 0; i < NRF_SDH_BLE_CENTRAL_LINK_COUNT; i++)
+        {
+                err_code = ble_its_c_init(&m_ble_its_c[i], &its_init);
+                APP_ERROR_CHECK(err_code);
+        }
 }
 
 
@@ -750,6 +814,7 @@ static void db_disc_handler(ble_db_discovery_evt_t * p_evt)
                       p_evt->conn_handle);
         ble_nus_c_on_db_disc_evt(&m_ble_nus_c[p_evt->conn_handle], p_evt);
         ble_lbs_on_db_disc_evt(&m_ble_lbs_c[p_evt->conn_handle], p_evt);
+        ble_its_c_on_db_disc_evt(&m_ble_its_c[p_evt->conn_handle], p_evt);
 }
 
 
@@ -884,6 +949,7 @@ int main(void)
         db_discovery_init();
         lbs_c_init();
         nus_c_init();
+        its_c_init();
 
         // Start execution.
         NRF_LOG_INFO("Example : Multi-link Central LBS + NUS");

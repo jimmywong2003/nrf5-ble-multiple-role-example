@@ -60,14 +60,18 @@
 #include "boards.h"
 #include "app_timer.h"
 #include "app_button.h"
-#include "ble_lbs.h"
-#include "ble_nus.h"
+
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
 
 #include "app_scheduler.h"
 #include "nrf_delay.h"
+
+
+#include "ble_lbs.h"
+#include "ble_nus.h"
+#include "ble_image_transfer_service.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -125,6 +129,8 @@
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 BLE_LBS_DEF(m_lbs);                                                             /**< LED Button Service instance. */
+BLE_ITS_DEF(m_its, NRF_SDH_BLE_TOTAL_LINK_COUNT); /**< BLE IMAGE TRANSFER service instance. */
+
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 
@@ -136,6 +142,7 @@ static uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX];         
 
 
 static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;              /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
+static uint16_t m_ble_its_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3; /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 
 
 /**@brief Struct that contains pointers to the encoded advertising data. */
@@ -233,6 +240,16 @@ static void gap_params_init(void)
 //                                      .addr = {0xC3,0x11,0x99,0x33,0x44,0xFF}};
 //        err_code = sd_ble_gap_addr_set(&ble_address);
 //        APP_ERROR_CHECK(err_code);
+}
+
+
+static void its_data_handler(ble_its_t *p_its, uint8_t const *p_data, uint16_t length)
+{
+        //if (p_evt->type == BLE_ITS_EVT_RX_DATA)
+        {
+
+
+        }
 }
 
 
@@ -436,7 +453,7 @@ void uart_event_handle(app_uart_evt_t * p_event)
                                         }
                                 } while (err_code == NRF_ERROR_RESOURCES);
                         }
-                       // app_uart_flush();
+                        // app_uart_flush();
                         index = 0;
                 }
 
@@ -491,9 +508,10 @@ static void uart_init(void)
 static void services_init(void)
 {
         ret_code_t err_code;
-        ble_lbs_init_t init     = {0};
+        ble_lbs_init_t lbs_init     = {0};
         nrf_ble_qwr_init_t qwr_init = {0};
         ble_nus_init_t nus_init;
+        ble_its_init_t its_init;
 
         // Initialize Queued Write Module.
         qwr_init.error_handler = nrf_qwr_error_handler;
@@ -502,9 +520,9 @@ static void services_init(void)
         APP_ERROR_CHECK(err_code);
 
         // Initialize LBS.
-        init.led_write_handler = led_write_handler;
+        lbs_init.led_write_handler = led_write_handler;
 
-        err_code = ble_lbs_init(&m_lbs, &init);
+        err_code = ble_lbs_init(&m_lbs, &lbs_init);
         APP_ERROR_CHECK(err_code);
 
         // Initialize NUS.
@@ -514,6 +532,14 @@ static void services_init(void)
 
         err_code = ble_nus_init(&m_nus, &nus_init);
 
+        APP_ERROR_CHECK(err_code);
+
+        // Initialize ITS.
+        memset(&its_init, 0, sizeof(its_init));
+
+        its_init.data_handler = its_data_handler;
+
+        err_code = ble_its_init(&m_its, &its_init);
         APP_ERROR_CHECK(err_code);
 }
 
@@ -819,7 +845,7 @@ int main(void)
         conn_params_init();
 
         // Start execution.
-        NRF_LOG_INFO("Channel Map Update Example : Peripheral LBS + NUS.");
+        NRF_LOG_INFO("Channel Map Update Example : Peripheral LBS + NUS + ITS.");
         advertising_start();
 
         // Enter main loop.
