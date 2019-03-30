@@ -1,10 +1,10 @@
-# nrf5-multilink-lbs-nus-example
+# nrf5-multilink-lbs-nus-its-example
 
 ## Description
 
 Inside Nordic nRF5 SDK, it has the BLE mult-link central example which uses to connect more BLE Blinky Application as peripherals.
 
-In this example, it adds the NUS (Nordic Uart Service) with BLE Blinky service (LBS) together.
+In this example, it adds the NUS (Nordic Uart Service) and Image Transfer Service (ITS) with BLE Blinky service (LBS) together.
 
 ### Central Role
 
