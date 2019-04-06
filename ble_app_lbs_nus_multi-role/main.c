@@ -61,9 +61,6 @@
 #include "app_timer.h"
 #include "app_button.h"
 
-#include "ble_conn_state.h"
-
-#include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
 
@@ -73,6 +70,16 @@
 #include "ble_lbs.h"
 #include "ble_nus.h"
 #include "ble_image_transfer_service.h"
+
+#include "ble_db_discovery.h"
+
+#include "ble_nus_c.h"
+#include "ble_lbs_c.h"
+#include "ble_image_transfer_service_c.h"
+
+#include "nrf_ble_gatt.h"
+#include "nrf_ble_scan.h"
+#include "ble_conn_state.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -91,6 +98,10 @@
 #define CONNECTED_LED                   BSP_BOARD_LED_1                         /**< Is on when device has connected. */
 #define LEDBUTTON_LED                   BSP_BOARD_LED_2                         /**< LED to be toggled with the help of the LED Button Service. */
 
+
+#define CENTRAL_SCANNING_LED            BSP_BOARD_LED_3                     /**< Scanning LED will be on when the device is scanning. */
+#define CENTRAL_CONNECTED_LED           CONNECTED_LED                     /**< Connected LED will be on when the device is connected. */
+
 #define LEDBUTTON_BUTTON                BSP_BUTTON_0                            /**< Button that will trigger the notification event with the LED Button Service */
 #define ADV_BUTTON                      BSP_BUTTON_1
 #define SCAN_BUTTON                     BPS_BUTTON_2
@@ -104,6 +115,10 @@
 
 #define APP_ADV_INTERVAL                64                                      /**< The advertising interval (in units of 0.625 ms; this value corresponds to 40 ms). */
 #define APP_ADV_DURATION                BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED   /**< The advertising time-out (in units of seconds). When set to 0, we will never time out. */
+
+#define SCAN_INTERVAL                   0x00A0                              /**< Determines scan interval in units of 0.625 millisecond. */
+#define SCAN_WINDOW                     0x0050                              /**< Determines scan window in units of 0.625 millisecond. */
+#define SCAN_DURATION                   0x0000                              /**< Timout when scanning. 0x0000 disables timeout. */
 
 
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(7.5, UNIT_1_25_MS)        /**< Minimum acceptable connection interval (0.5 seconds). */
@@ -137,10 +152,21 @@ BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                               
 BLE_LBS_DEF(m_lbs);                                                             /**< LED Button Service instance. */
 BLE_ITS_DEF(m_its, NRF_SDH_BLE_TOTAL_LINK_COUNT); /**< BLE IMAGE TRANSFER service instance. */
 
-NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
-///NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 
+
+NRF_BLE_SCAN_DEF(m_scan);                                       /**< Scanning module instance. */
+BLE_NUS_C_ARRAY_DEF(m_ble_nus_c, NRF_SDH_BLE_CENTRAL_LINK_COUNT);
+BLE_LBS_C_ARRAY_DEF(m_ble_lbs_c, NRF_SDH_BLE_CENTRAL_LINK_COUNT);           /**< LED button client instances. */
+BLE_ITS_C_ARRAY_DEF(m_ble_its_c, NRF_SDH_BLE_CENTRAL_LINK_COUNT);          /**< BLE Nordic Image Transfer Service (ITS) client instance. */
+
+BLE_DB_DISCOVERY_ARRAY_DEF(m_db_disc, NRF_SDH_BLE_CENTRAL_LINK_COUNT);  /**< Database discovery module instances. */
+
+NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWRS_DEF(m_qwr, NRF_SDH_BLE_TOTAL_LINK_COUNT);                          /**< Context for the Queued Write module.*/
+
+static char const m_target_periph_name[] = "LBS_NUS_Node";     /**< Name of the device we try to connect to. This name is searched in the scan report data*/
+
+
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        /**< Handle of the current connection. */
 
@@ -151,6 +177,176 @@ static uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX];         
 
 static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;              /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 static uint16_t m_ble_its_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3; /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
+
+
+/**@brief Function to start scanning.
+ */
+static void scan_start(void)
+{
+        ret_code_t err_code;
+
+        err_code = nrf_ble_scan_start(&m_scan);
+        APP_ERROR_CHECK(err_code);
+
+        bsp_board_led_off(CENTRAL_CONNECTED_LED);
+        bsp_board_led_on(CENTRAL_SCANNING_LED);
+}
+
+/**@brief Function for handling characters received by the Nordic UART Service (NUS).
+ *
+ * @details This function takes a list of characters of length data_len and prints the characters out on UART.
+ *          If @ref ECHOBACK_BLE_UART_DATA is set, the data is sent back to sender.
+ */
+static void ble_nus_chars_received_uart_print(uint8_t * p_data, uint16_t data_len)
+{
+        ret_code_t ret_val;
+
+        NRF_LOG_DEBUG("Receiving data.");
+        NRF_LOG_HEXDUMP_DEBUG(p_data, data_len);
+
+        for (uint32_t i = 0; i < data_len; i++)
+        {
+                do
+                {
+                        ret_val = app_uart_put(p_data[i]);
+                        if ((ret_val != NRF_SUCCESS) && (ret_val != NRF_ERROR_BUSY))
+                        {
+                                NRF_LOG_ERROR("app_uart_put failed for index 0x%04x.", i);
+                                APP_ERROR_CHECK(ret_val);
+                        }
+                } while (ret_val == NRF_ERROR_BUSY);
+        }
+        if (p_data[data_len-1] == '\r')
+        {
+                while (app_uart_put('\n') == NRF_ERROR_BUSY);
+        }
+}
+
+/**@snippet [Handling events from the ble_nus_c module] */
+static void ble_nus_c_evt_handler(ble_nus_c_t * p_ble_nus_c, ble_nus_c_evt_t const * p_ble_nus_c_evt)
+{
+        ret_code_t err_code;
+
+        switch (p_ble_nus_c_evt->evt_type)
+        {
+        case BLE_NUS_C_EVT_DISCOVERY_COMPLETE:
+                NRF_LOG_INFO("NUS Service discovered on conn_handle 0x%x",
+                             p_ble_nus_c_evt->conn_handle);
+
+                err_code = ble_nus_c_handles_assign(p_ble_nus_c, p_ble_nus_c_evt->conn_handle, &p_ble_nus_c_evt->handles);
+                APP_ERROR_CHECK(err_code);
+
+
+                NRF_LOG_INFO("Before enable the tx notification");
+                NRF_LOG_HEXDUMP_DEBUG(p_ble_nus_c, sizeof(ble_nus_c_t));
+                err_code = ble_nus_c_tx_notif_enable(p_ble_nus_c);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("Connected to device with Nordic UART Service.\n\n");
+                break;
+
+        case BLE_NUS_C_EVT_NUS_TX_EVT:
+                ble_nus_chars_received_uart_print(p_ble_nus_c_evt->p_data, p_ble_nus_c_evt->data_len);
+                break;
+
+        case BLE_NUS_C_EVT_DISCONNECTED:
+                NRF_LOG_INFO("Disconnected.");
+                scan_start();
+                break;
+        }
+}
+
+/**@brief Handles events coming from the LED Button central module.
+ */
+static void lbs_c_evt_handler(ble_lbs_c_t * p_lbs_c, ble_lbs_c_evt_t * p_lbs_c_evt)
+{
+        switch (p_lbs_c_evt->evt_type)
+        {
+        case BLE_LBS_C_EVT_DISCOVERY_COMPLETE:
+        {
+                ret_code_t err_code;
+
+//                err_code = ble_lbs_c_handles_assign(&m_ble_lbs_c,
+//                                                     p_lbs_c_evt->conn_handle,
+//                                                     &p_lbs_c_evt->params.peer_db);
+                NRF_LOG_INFO("LED Button service discovered on conn_handle 0x%x.", p_lbs_c_evt->conn_handle);
+
+
+
+                err_code = app_button_enable();
+                APP_ERROR_CHECK(err_code);
+
+
+                NRF_LOG_DEBUG("Enable the LBS button notification");
+                NRF_LOG_HEXDUMP_INFO(p_lbs_c, sizeof(ble_lbs_c_t));
+                // LED Button service discovered. Enable notification of Button.
+                err_code = ble_lbs_c_button_notif_enable(p_lbs_c);
+                APP_ERROR_CHECK(err_code);
+        } break; // BLE_LBS_C_EVT_DISCOVERY_COMPLETE
+
+        case BLE_LBS_C_EVT_BUTTON_NOTIFICATION:
+        {
+                NRF_LOG_INFO("Link 0x%x, Button state changed on peer to 0x%x",
+                             p_lbs_c_evt->conn_handle,
+                             p_lbs_c_evt->params.button.button_state);
+                // NRF_LOG_INFO("Button state changed on peer to 0x%x.", p_lbs_c_evt->params.button.button_state);
+                if (p_lbs_c_evt->params.button.button_state)
+                {
+                        bsp_board_led_on(LEDBUTTON_LED);
+                }
+                else
+                {
+                        bsp_board_led_off(LEDBUTTON_LED);
+                }
+        } break; // BLE_LBS_C_EVT_BUTTON_NOTIFICATION
+
+        default:
+                // No implementation needed.
+                break;
+        }
+}
+
+static void ble_its_c_evt_handler(ble_its_c_t *p_ble_its_c, ble_its_c_evt_t const *p_ble_its_evt)
+{
+        ret_code_t err_code;
+        uint32_t receive_byte = 0;
+
+        switch (p_ble_its_evt->evt_type)
+        {
+        case BLE_ITS_C_EVT_DISCOVERY_COMPLETE:
+                NRF_LOG_INFO("ITS Service: Discovery complete.");
+                err_code = ble_its_c_handles_assign(p_ble_its_c, p_ble_its_evt->conn_handle, &p_ble_its_evt->handles);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("ble_its_c_tx_notif_enable.");
+                err_code = ble_its_c_tx_notif_enable(p_ble_its_c);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("ble_its_c_img_info_notif_enable.");
+                err_code = ble_its_c_img_info_notif_enable(p_ble_its_c);
+                APP_ERROR_CHECK(err_code);
+
+                NRF_LOG_INFO("Connected to device with Nordic ITS Service.");
+                break;
+
+        case BLE_ITS_C_EVT_ITS_RX_EVT:
+                NRF_LOG_INFO("BLE_ITS_C_EVT_ITS_RX_EVT");
+                break;
+
+        case BLE_ITS_C_EVT_ITS_TX_EVT:
+                NRF_LOG_DEBUG("BLE_ITS_C_EVT_ITS_TX_EVT %04d", receive_byte);
+                break;
+
+        case BLE_ITS_C_EVT_ITS_IMG_INFO_EVT:
+                NRF_LOG_DEBUG("BLE_ITS_C_EVT_ITS_IMG_INFO_EVT %04d", receive_byte);
+                break;
+
+        case BLE_ITS_C_EVT_DISCONNECTED:
+                NRF_LOG_INFO("Disconnected.");
+                //scan_start();
+                break;
+        }
+}
 
 
 /**@brief Struct that contains pointers to the encoded advertising data. */
@@ -712,17 +908,46 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
         ret_code_t err_code;
 
+        // For readability.
+        ble_gap_evt_t const * p_gap_evt = &p_ble_evt->evt.gap_evt;
+
         switch (p_ble_evt->header.evt_id)
         {
         case BLE_GAP_EVT_CONNECTED:
                 NRF_LOG_INFO("Connected");
-                // bsp_board_led_on(CONNECTED_LED);
-                // bsp_board_led_off(ADVERTISING_LED);
+                NRF_LOG_INFO("Connection 0x%x established, starting DB discovery.",
+                             p_gap_evt->conn_handle);
+
+                APP_ERROR_CHECK_BOOL(p_gap_evt->conn_handle < NRF_SDH_BLE_CENTRAL_LINK_COUNT);
+
+                err_code = ble_lbs_c_handles_assign(&m_ble_lbs_c[p_gap_evt->conn_handle], p_gap_evt->conn_handle, NULL);
+                APP_ERROR_CHECK(err_code);
+
+                err_code = ble_nus_c_handles_assign(&m_ble_nus_c[p_gap_evt->conn_handle], p_gap_evt->conn_handle, NULL);
+                APP_ERROR_CHECK(err_code);
+
+                err_code = ble_its_c_handles_assign(&m_ble_its_c[p_gap_evt->conn_handle], p_gap_evt->conn_handle, NULL);
+                APP_ERROR_CHECK(err_code);
+
+                err_code = ble_db_discovery_start(&m_db_disc[p_gap_evt->conn_handle], p_gap_evt->conn_handle);
+                APP_ERROR_CHECK(err_code);
+
+                // Update LEDs status and check whether it is needed to look for more
+                // peripherals to connect to.
+                bsp_board_led_on(CENTRAL_CONNECTED_LED);
+                if (ble_conn_state_central_conn_count() == NRF_SDH_BLE_CENTRAL_LINK_COUNT)
+                {
+                        bsp_board_led_off(CENTRAL_SCANNING_LED);
+                }
+                else
+                {
+                        // Resume scanning.
+                        bsp_board_led_on(CENTRAL_SCANNING_LED);
+                        scan_start();
+                }
+
                 m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-                // // err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
-                // // APP_ERROR_CHECK(err_code);
-                // err_code = app_button_enable();
-                // APP_ERROR_CHECK(err_code);
+
                 on_connected(&p_ble_evt->evt.gap_evt);
                 // tx_power_set();
 
@@ -735,6 +960,17 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                 // err_code = app_button_disable();
                 // APP_ERROR_CHECK(err_code);
                 // advertising_start();
+
+                if (ble_conn_state_central_conn_count() == 0)
+                {
+                        err_code = app_button_disable();
+                        APP_ERROR_CHECK(err_code);
+
+                        // Turn off the LED that indicates the connection.
+                        bsp_board_led_off(CENTRAL_CONNECTED_LED);
+                }
+
+                scan_start();
 
                 on_disconnected(&p_ble_evt->evt.gap_evt);
                 break;
@@ -788,6 +1024,55 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         }
 }
 
+
+/**@brief Function for initializing the Nordic UART Service (NUS) client. */
+static void nus_c_init(void)
+{
+        ret_code_t err_code;
+        ble_nus_c_init_t init;
+
+        init.evt_handler = ble_nus_c_evt_handler;
+
+        for (uint32_t i = 0; i < NRF_SDH_BLE_CENTRAL_LINK_COUNT; i++)
+        {
+                err_code = ble_nus_c_init(&m_ble_nus_c[i], &init);
+                APP_ERROR_CHECK(err_code);
+        }
+}
+
+
+/**@brief LED Button client initialization.
+ */
+static void lbs_c_init(void)
+{
+        ret_code_t err_code;
+        ble_lbs_c_init_t lbs_c_init_obj;
+
+        lbs_c_init_obj.evt_handler = lbs_c_evt_handler;
+
+        for (uint32_t i = 0; i < NRF_SDH_BLE_CENTRAL_LINK_COUNT; i++)
+        {
+                err_code = ble_lbs_c_init(&m_ble_lbs_c[i], &lbs_c_init_obj);
+                APP_ERROR_CHECK(err_code);
+        }
+        // err_code = ble_lbs_c_init(&m_ble_lbs_c, &lbs_c_init_obj);
+        // APP_ERROR_CHECK(err_code);
+}
+
+static void its_c_init(void)
+{
+        ret_code_t err_code;
+        ble_its_c_init_t its_init;
+
+        its_init.evt_handler = ble_its_c_evt_handler;
+        for (uint32_t i = 0; i < NRF_SDH_BLE_CENTRAL_LINK_COUNT; i++)
+        {
+                err_code = ble_its_c_init(&m_ble_its_c[i], &its_init);
+                APP_ERROR_CHECK(err_code);
+        }
+}
+
+
 /**@brief Function for the Event Scheduler initialization.
  */
 static void scheduler_init(void)
@@ -812,6 +1097,20 @@ static void ble_stack_init(void)
         err_code = nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start);
         APP_ERROR_CHECK(err_code);
 
+        ble_cfg_t ble_cfg;
+        // Configure the GATTS attribute table.
+        memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+        ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = NRF_SDH_BLE_PERIPHERAL_LINK_COUNT;
+        ble_cfg.gap_cfg.role_count_cfg.central_role_count = NRF_SDH_BLE_CENTRAL_LINK_COUNT;
+        // ble_cfg.gap_cfg.role_count_cfg.qos_channel_survey_role_available = true; /* Enable channel survey role */
+
+        err_code = sd_ble_cfg_set(BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, &ram_start);
+        if (err_code != NRF_SUCCESS)
+        {
+                NRF_LOG_ERROR("sd_ble_cfg_set() returned %s when attempting to set BLE_GAP_CFG_ROLE_COUNT.",
+                              nrf_strerror_get(err_code));
+        }
+
         // Enable BLE stack.
         err_code = nrf_sdh_ble_enable(&ram_start);
         APP_ERROR_CHECK(err_code);
@@ -824,6 +1123,97 @@ static void ble_stack_init(void)
 
         // Register a handler for BLE events.
         NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
+}
+
+/**@brief Function for handling Scaning events.
+ *
+ * @param[in]   p_scan_evt   Scanning event.
+ */
+static void scan_evt_handler(scan_evt_t const * p_scan_evt)
+{
+        ret_code_t err_code;
+
+        switch(p_scan_evt->scan_evt_id)
+        {
+        case NRF_BLE_SCAN_EVT_CONNECTING_ERROR:
+                err_code = p_scan_evt->params.connecting_err.err_code;
+                APP_ERROR_CHECK(err_code);
+                break;
+
+        case NRF_BLE_SCAN_EVT_CONNECTED:
+        {
+                ble_gap_evt_connected_t const * p_connected =
+                        p_scan_evt->params.connected.p_connected;
+                // Scan is automatically stopped by the connection.
+                NRF_LOG_INFO("Connecting to target 0x%02x%02x%02x%02x%02x%02x",
+                             p_connected->peer_addr.addr[0],
+                             p_connected->peer_addr.addr[1],
+                             p_connected->peer_addr.addr[2],
+                             p_connected->peer_addr.addr[3],
+                             p_connected->peer_addr.addr[4],
+                             p_connected->peer_addr.addr[5]
+                             );
+        } break;
+
+        case NRF_BLE_SCAN_EVT_SCAN_TIMEOUT:
+        {
+                NRF_LOG_INFO("Scan timed out.");
+                scan_start();
+        } break;
+        default:
+                break;
+        }
+}
+
+/**@brief Function for handling database discovery events.
+ *
+ * @details This function is callback function to handle events from the database discovery module.
+ *          Depending on the UUIDs that are discovered, this function should forward the events
+ *          to their respective services.
+ *
+ * @param[in] p_event  Pointer to the database discovery event.
+ */
+static void db_disc_handler(ble_db_discovery_evt_t * p_evt)
+{
+        // ble_lbs_on_db_disc_evt(&m_ble_lbs_c, p_evt);
+        // ble_nus_c_on_db_disc_evt(&m_ble_nus_c, p_evt);
+        NRF_LOG_DEBUG("call to ble_lbs_on_db_disc_evt for instance %d and link 0x%x!",
+                      p_evt->conn_handle,
+                      p_evt->conn_handle);
+        ble_nus_c_on_db_disc_evt(&m_ble_nus_c[p_evt->conn_handle], p_evt);
+        ble_lbs_on_db_disc_evt(&m_ble_lbs_c[p_evt->conn_handle], p_evt);
+        ble_its_c_on_db_disc_evt(&m_ble_its_c[p_evt->conn_handle], p_evt);
+}
+
+
+/**@brief Database discovery initialization.
+ */
+static void db_discovery_init(void)
+{
+        ret_code_t err_code = ble_db_discovery_init(db_disc_handler);
+        APP_ERROR_CHECK(err_code);
+}
+
+
+static void scan_init(void)
+{
+        ret_code_t err_code;
+        nrf_ble_scan_init_t init_scan;
+
+        memset(&init_scan, 0, sizeof(init_scan));
+
+        init_scan.connect_if_match = true;
+        init_scan.conn_cfg_tag     = APP_BLE_CONN_CFG_TAG;
+
+        err_code = nrf_ble_scan_init(&m_scan, &init_scan, scan_evt_handler);
+        APP_ERROR_CHECK(err_code);
+
+        // Setting filters for scanning.
+        err_code = nrf_ble_scan_filters_enable(&m_scan, NRF_BLE_SCAN_NAME_FILTER, false);
+        APP_ERROR_CHECK(err_code);
+
+        err_code = nrf_ble_scan_filter_set(&m_scan, SCAN_NAME_FILTER, m_target_periph_name);
+        APP_ERROR_CHECK(err_code);
 }
 
 
@@ -930,11 +1320,16 @@ int main(void)
         power_management_init();
         ble_stack_init();
         scheduler_init();
+        scan_init();
         gap_params_init();
         gatt_init();
         services_init();
         advertising_init();
         conn_params_init();
+        db_discovery_init();
+        lbs_c_init();
+        nus_c_init();
+        its_c_init();
 
         // Start execution.
         NRF_LOG_INFO("Channel Map Update Example : Peripheral LBS + NUS + ITS.");
