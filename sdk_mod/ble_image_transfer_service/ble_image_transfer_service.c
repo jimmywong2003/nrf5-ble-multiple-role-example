@@ -71,7 +71,7 @@ volatile uint32_t file_size = 0, file_pos = 0, m_max_data_length = 20;
 uint8_t * file_data;
 ble_its_t * m_its;
 
-#define ITS_ENABLE_PIN_DEBUGGING 1
+#define ITS_ENABLE_PIN_DEBUGGING 0
 
 #if (ITS_ENABLE_PIN_DEBUGGING == 1)
 #define ITS_DEBUG_PIN_SET(_pin) nrf_gpio_pin_set(DBG_PIN_ ## _pin)
@@ -84,29 +84,29 @@ ble_its_t * m_its;
 static void its_enable_gpio_debug(void)
 {
 #if (ITS_ENABLE_PIN_DEBUGGING == 1)
-        nrf_gpio_cfg_output(DBG_PIN_0);
-        nrf_gpio_cfg_output(DBG_PIN_1);
-        nrf_gpio_cfg_output(DBG_PIN_2);
-
-        // Configure two GPIO's to signal TX and RX activity on the radio, for debugging throughput issues on different phones
-        NRF_GPIOTE->CONFIG[0] = GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos |
-                                GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos |
-                                DBG_PIN_3 << GPIOTE_CONFIG_PSEL_Pos;
-        NRF_GPIOTE->CONFIG[1] = GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos |
-                                GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos |
-                                DBG_PIN_4 << GPIOTE_CONFIG_PSEL_Pos;
-
-        NRF_PPI->CH[0].EEP = (uint32_t)&NRF_RADIO->EVENTS_TXREADY;
-        NRF_PPI->CH[0].TEP = (uint32_t)&NRF_GPIOTE->TASKS_SET[0];
-
-        NRF_PPI->CH[1].EEP = (uint32_t)&NRF_RADIO->EVENTS_RXREADY;
-        NRF_PPI->CH[1].TEP = (uint32_t)&NRF_GPIOTE->TASKS_SET[1];
-
-        NRF_PPI->CH[2].EEP = (uint32_t)&NRF_RADIO->EVENTS_CRCERROR;//EVENTS_DISABLED;
-        NRF_PPI->CH[2].TEP = (uint32_t)&NRF_GPIOTE->TASKS_CLR[0];
-        NRF_PPI->FORK[2].TEP = (uint32_t)&NRF_GPIOTE->TASKS_CLR[1];
-
-        NRF_PPI->CHENSET = 0x07;
+//        nrf_gpio_cfg_output(DBG_PIN_0);
+//        nrf_gpio_cfg_output(DBG_PIN_1);
+//        nrf_gpio_cfg_output(DBG_PIN_2);
+//
+//        // Configure two GPIO's to signal TX and RX activity on the radio, for debugging throughput issues on different phones
+//        NRF_GPIOTE->CONFIG[0] = GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos |
+//                                GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos |
+//                                DBG_PIN_3 << GPIOTE_CONFIG_PSEL_Pos;
+//        NRF_GPIOTE->CONFIG[1] = GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos |
+//                                GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos |
+//                                DBG_PIN_4 << GPIOTE_CONFIG_PSEL_Pos;
+//
+//        NRF_PPI->CH[0].EEP = (uint32_t)&NRF_RADIO->EVENTS_TXREADY;
+//        NRF_PPI->CH[0].TEP = (uint32_t)&NRF_GPIOTE->TASKS_SET[0];
+//
+//        NRF_PPI->CH[1].EEP = (uint32_t)&NRF_RADIO->EVENTS_RXREADY;
+//        NRF_PPI->CH[1].TEP = (uint32_t)&NRF_GPIOTE->TASKS_SET[1];
+//
+//        NRF_PPI->CH[2].EEP = (uint32_t)&NRF_RADIO->EVENTS_CRCERROR;//EVENTS_DISABLED;
+//        NRF_PPI->CH[2].TEP = (uint32_t)&NRF_GPIOTE->TASKS_CLR[0];
+//        NRF_PPI->FORK[2].TEP = (uint32_t)&NRF_GPIOTE->TASKS_CLR[1];
+//
+//        NRF_PPI->CHENSET = 0x07;
 #endif
 }
 
