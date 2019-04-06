@@ -1,4 +1,4 @@
-# nrf5-multilink-lbs-nus-its-example
+# nrf5-multlink-lbs-nus-its-example
 
 ## Description
 
