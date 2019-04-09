@@ -451,7 +451,8 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                         bsp_board_led_on(CENTRAL_SCANNING_LED);
                         scan_start();
                 }
-        } break;
+        }
+        break;
 
         // Upon disconnection, reset the connection handle of the peer which disconnected, update
         // the LEDs status and start scanning again.

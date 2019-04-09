@@ -11088,7 +11088,7 @@
 // <i> Requested BLE GAP data length to be negotiated.
 
 #ifndef NRF_SDH_BLE_GAP_DATA_LENGTH
-#define NRF_SDH_BLE_GAP_DATA_LENGTH 251
+#define NRF_SDH_BLE_GAP_DATA_LENGTH 27
 #endif
 
 // <o> NRF_SDH_BLE_PERIPHERAL_LINK_COUNT - Maximum number of peripheral links.
@@ -11117,12 +11117,12 @@
 
 // <o> NRF_SDH_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size.
 #ifndef NRF_SDH_BLE_GATT_MAX_MTU_SIZE
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 247
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 23
 #endif
 
 // <o> NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE - Attribute Table size in bytes. The size must be a multiple of 4.
 #ifndef NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE
-#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1508
+#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1708
 #endif
 
 // <o> NRF_SDH_BLE_VS_UUID_COUNT - The number of vendor-specific UUIDs.
@@ -11334,6 +11334,20 @@
 
 #ifndef BLE_NUS_C_BLE_OBSERVER_PRIO
 #define BLE_NUS_C_BLE_OBSERVER_PRIO 2
+#endif
+
+// <o> BLE_ITS_BLE_OBSERVER_PRIO
+// <i> Priority with which BLE events are dispatched to the ITS Service.
+
+#ifndef BLE_ITS_BLE_OBSERVER_PRIO
+#define BLE_ITS_BLE_OBSERVER_PRIO 2
+#endif
+
+// <o> BLE_ITS_C_BLE_OBSERVER_PRIO
+// <i> Priority with which BLE events are dispatched to the ITS Central Client.
+
+#ifndef BLE_ITS_C_BLE_OBSERVER_PRIO
+#define BLE_ITS_C_BLE_OBSERVER_PRIO 2
 #endif
 
 // <o> BLE_OTS_BLE_OBSERVER_PRIO
