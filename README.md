@@ -27,5 +27,7 @@ To compile it, clone the repository in the /nRF5_SDK_15.3.0/examples/ directory.
 
 The application is built to be used with the official nRF5 SDK that can be downloaded from developer.nordicsemi.com
 
+For details, you can refer to the [URL](https://jimmywongbluetooth.wordpress.com/2019/04/09/ble-multiple-role-peripheral-central).
+
 
 
