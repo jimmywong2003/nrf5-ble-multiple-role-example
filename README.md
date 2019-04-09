@@ -19,6 +19,7 @@ All of them contains the GATT Server / Client.
 
 * Peripheral Role -- NRF52840 DK / NRF52832 DK
 * Central Role -- NRF52840 DK
+* Combo Role -- NRF52832 DK / NRF52840 DK
 * IDE Segger Embedded Studio
 
 The project may need modifications to work with later versions or other boards.
