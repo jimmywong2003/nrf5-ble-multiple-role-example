@@ -4,53 +4,15 @@
 
 Inside Nordic nRF5 SDK, it has the BLE mult-link central example which uses to connect more BLE Blinky Application as peripherals.
 
-In this example, it adds the NUS (Nordic Uart Service) and Image Transfer Service (ITS) with BLE Blinky service (LBS) together.
+In this example, there are three difference roles.
+* Peripheral role 
+* Central role
+* 2 x Peripheral Role + 2 x Central Role
 
-### Central Role
-
-```
-// Set the number of connection to 8 in this example
-
-// Central Side (inside the sdk_config.h) 
-
-// <o> NRF_SDH_BLE_PERIPHERAL_LINK_COUNT - Maximum number of peripheral links. 
-#ifndef NRF_SDH_BLE_PERIPHERAL_LINK_COUNT
-#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 0
-#endif
-
-// <o> NRF_SDH_BLE_CENTRAL_LINK_COUNT - Maximum number of central links. 
-#ifndef NRF_SDH_BLE_CENTRAL_LINK_COUNT
-#define NRF_SDH_BLE_CENTRAL_LINK_COUNT 8
-#endif
-
-// <o> NRF_SDH_BLE_TOTAL_LINK_COUNT - Total link count. 
-// <i> Maximum number of total concurrent connections using the default configuration.
-
-#ifndef NRF_SDH_BLE_TOTAL_LINK_COUNT
-#define NRF_SDH_BLE_TOTAL_LINK_COUNT 8
-#endif
-```
-### Peripheral Role
-
-```
-// <o> NRF_SDH_BLE_PERIPHERAL_LINK_COUNT - Maximum number of peripheral links. 
-#ifndef NRF_SDH_BLE_PERIPHERAL_LINK_COUNT
-#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
-#endif
-
-// <o> NRF_SDH_BLE_CENTRAL_LINK_COUNT - Maximum number of central links. 
-#ifndef NRF_SDH_BLE_CENTRAL_LINK_COUNT
-#define NRF_SDH_BLE_CENTRAL_LINK_COUNT 0
-#endif
-
-// <o> NRF_SDH_BLE_TOTAL_LINK_COUNT - Total link count. 
-// <i> Maximum number of total concurrent connections using the default configuration.
-
-#ifndef NRF_SDH_BLE_TOTAL_LINK_COUNT
-#define NRF_SDH_BLE_TOTAL_LINK_COUNT 1
-#endif
-
-```
+All of them contains the GATT Server / Client.
+* NUS (Nordic Uart Service)
+* Image Transfer Service (ITS)
+* BLE Blinky service (LBS)
 
 
 ## Requirement
