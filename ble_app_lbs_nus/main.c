@@ -113,13 +113,12 @@
 
 #define SCHED_MAX_EVENT_DATA_SIZE           APP_TIMER_SCHED_EVENT_DATA_SIZE            /**< Maximum size of scheduler events. */
 #ifdef SVCALL_AS_NORMAL_FUNCTION
-#define SCHED_QUEUE_SIZE                    20                                         /**< Maximum number of events in the scheduler queue. More is needed in case of Serialization. */
+#define SCHED_QUEUE_SIZE                    40                                         /**< Maximum number of events in the scheduler queue. More is needed in case of Serialization. */
 #else
-#define SCHED_QUEUE_SIZE                    10                                         /**< Maximum number of events in the scheduler queue. */
+#define SCHED_QUEUE_SIZE                    20                                         /**< Maximum number of events in the scheduler queue. */
 #endif
 
 #define TX_POWER_LEVEL                  (4)                                    /**< TX Power Level value. This will be set both in the TX Power service, in the advertising data, and also used to set the radio transmit power. */
-
 
 #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
@@ -622,6 +621,9 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
         ret_code_t err_code;
 
+        // For readability.
+        ble_gap_evt_t const * p_gap_evt = &p_ble_evt->evt.gap_evt;
+
         switch (p_ble_evt->header.evt_id)
         {
         case BLE_GAP_EVT_CONNECTED:
@@ -639,7 +641,9 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                 break;
 
         case BLE_GAP_EVT_DISCONNECTED:
-                NRF_LOG_INFO("Disconnected");
+                NRF_LOG_INFO("Connection 0x%x has been disconnected. Reason: 0x%X",
+                             p_gap_evt->conn_handle,
+                             p_gap_evt->params.disconnected.reason);
                 bsp_board_led_off(CONNECTED_LED);
                 m_conn_handle = BLE_CONN_HANDLE_INVALID;
                 err_code = app_button_disable();
