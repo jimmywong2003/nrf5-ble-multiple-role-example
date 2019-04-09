@@ -1,4 +1,4 @@
-# nrf5-multlink-lbs-nus-its-example
+# BLE Multiple Role Concurrent Example
 
 ## Description
 
