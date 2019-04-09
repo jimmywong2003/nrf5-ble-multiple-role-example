@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 - 2018, Nordic Semiconductor ASA
+ * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -46,6 +46,19 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
+// <h> Board Support
+
+//==========================================================
+// <q> BSP_BTN_BLE_ENABLED  - bsp_btn_ble - Button Control for BLE
+
+
+#ifndef BSP_BTN_BLE_ENABLED
+#define BSP_BTN_BLE_ENABLED 1
+#endif
+
+// </h>
+//==========================================================
+
 // <h> nRF_BLE
 
 //==========================================================
@@ -53,7 +66,7 @@
 
 
 #ifndef BLE_ADVERTISING_ENABLED
-#define BLE_ADVERTISING_ENABLED 0
+#define BLE_ADVERTISING_ENABLED 1
 #endif
 
 // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
@@ -492,6 +505,10 @@
 
 // </e>
 
+// <q> BLE_ITS_C_ENABLED  - ble_ITS_c - Nordic UART Central Service
+#ifndef BLE_ITS_C_ENABLED
+#define BLE_ITS_C_ENABLED 0
+#endif
 
 // <e> BLE_ITS_ENABLED - ble_ITS - Nordic UART Service
 //==========================================================
@@ -581,16 +598,16 @@
 // <h> nRF_Core
 
 //==========================================================
-// <e> NRF_MPU_ENABLED - nrf_mpu - Module for MPU
+// <e> NRF_MPU_LIB_ENABLED - nrf_mpu_lib - Module for MPU
 //==========================================================
-#ifndef NRF_MPU_ENABLED
-#define NRF_MPU_ENABLED 0
+#ifndef NRF_MPU_LIB_ENABLED
+#define NRF_MPU_LIB_ENABLED 0
 #endif
-// <q> NRF_MPU_CLI_CMDS  - Enable CLI commands specific to the module.
+// <q> NRF_MPU_LIB_CLI_CMDS  - Enable CLI commands specific to the module.
 
 
-#ifndef NRF_MPU_CLI_CMDS
-#define NRF_MPU_CLI_CMDS 0
+#ifndef NRF_MPU_LIB_CLI_CMDS
+#define NRF_MPU_LIB_CLI_CMDS 0
 #endif
 
 // </e>
@@ -686,6 +703,15 @@
 
 #ifndef NRF_CRYPTO_BACKEND_CC310_BL_HASH_AUTOMATIC_RAM_BUFFER_SIZE
 #define NRF_CRYPTO_BACKEND_CC310_BL_HASH_AUTOMATIC_RAM_BUFFER_SIZE 4096
+#endif
+
+// <q> NRF_CRYPTO_BACKEND_CC310_BL_INTERRUPTS_ENABLED  - Enable Interrupts while support using CC310 bl.
+
+
+// <i> Select a library version compatible with the configuration. When interrupts are disable, a version named _noint must be used
+
+#ifndef NRF_CRYPTO_BACKEND_CC310_BL_INTERRUPTS_ENABLED
+#define NRF_CRYPTO_BACKEND_CC310_BL_INTERRUPTS_ENABLED 1
 #endif
 
 // </e>
@@ -885,6 +911,15 @@
 
 #ifndef NRF_CRYPTO_BACKEND_CC310_RNG_ENABLED
 #define NRF_CRYPTO_BACKEND_CC310_RNG_ENABLED 1
+#endif
+
+// <q> NRF_CRYPTO_BACKEND_CC310_INTERRUPTS_ENABLED  - Enable Interrupts while support using CC310.
+
+
+// <i> Select a library version compatible with the configuration. When interrupts are disable, a version named _noint must be used
+
+#ifndef NRF_CRYPTO_BACKEND_CC310_INTERRUPTS_ENABLED
+#define NRF_CRYPTO_BACKEND_CC310_INTERRUPTS_ENABLED 1
 #endif
 
 // </e>
@@ -1268,6 +1303,33 @@
 
 // </e>
 
+// <e> NRF_CRYPTO_BACKEND_OPTIGA_ENABLED - Enable the nrf_crypto Optiga Trust X backend.
+
+// <i> Enables the nrf_crypto backend for Optiga Trust X devices.
+//==========================================================
+#ifndef NRF_CRYPTO_BACKEND_OPTIGA_ENABLED
+#define NRF_CRYPTO_BACKEND_OPTIGA_ENABLED 0
+#endif
+// <q> NRF_CRYPTO_BACKEND_OPTIGA_RNG_ENABLED  - Optiga backend support for RNG
+
+
+// <i> The Optiga backend provide external chip RNG.
+
+#ifndef NRF_CRYPTO_BACKEND_OPTIGA_RNG_ENABLED
+#define NRF_CRYPTO_BACKEND_OPTIGA_RNG_ENABLED 0
+#endif
+
+// <q> NRF_CRYPTO_BACKEND_OPTIGA_ECC_SECP256R1_ENABLED  - Optiga backend support for ECC secp256r1
+
+
+// <i> The Optiga backend provide external chip ECC using secp256r1.
+
+#ifndef NRF_CRYPTO_BACKEND_OPTIGA_ECC_SECP256R1_ENABLED
+#define NRF_CRYPTO_BACKEND_OPTIGA_ECC_SECP256R1_ENABLED 1
+#endif
+
+// </e>
+
 // <q> NRF_CRYPTO_CURVE25519_BIG_ENDIAN_ENABLED  - Big-endian byte order in raw Curve25519 data
 
 
@@ -1407,15 +1469,6 @@
 #ifndef EGU_ENABLED
 #define EGU_ENABLED 0
 #endif
-
-//==========================================================
-// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
-
-
-#ifndef APP_FIFO_ENABLED
-#define APP_FIFO_ENABLED 1
-#endif
-
 
 // <e> GPIOTE_ENABLED - nrf_drv_gpiote - GPIOTE peripheral driver - legacy layer
 //==========================================================
@@ -2667,13 +2720,6 @@
 #define NRFX_PWM2_ENABLED 0
 #endif
 
-// <q> NRFX_PWM3_ENABLED  - Enable PWM3 instance
-
-
-#ifndef NRFX_PWM3_ENABLED
-#define NRFX_PWM3_ENABLED 0
-#endif
-
 // <o> NRFX_PWM_DEFAULT_CONFIG_OUT0_PIN - Out0 pin  <0-31>
 
 
@@ -2813,6 +2859,34 @@
 
 #ifndef NRFX_PWM_CONFIG_DEBUG_COLOR
 #define NRFX_PWM_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> NRFX_PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED - Enables nRF52 Anomaly 109 workaround for PWM.
+
+// <i> The workaround uses interrupts to wake up the CPU and ensure
+// <i> it is active when PWM is about to start a DMA transfer. For
+// <i> initial transfer, done when a playback is started via PPI,
+// <i> a specific EGU instance is used to generate the interrupt.
+// <i> During the playback, the PWM interrupt triggered on SEQEND
+// <i> event of a preceding sequence is used to protect the transfer
+// <i> done for the next sequence to be played.
+//==========================================================
+#ifndef NRFX_PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
+// <o> NRFX_PWM_NRF52_ANOMALY_109_EGU_INSTANCE  - EGU instance used by the nRF52 Anomaly 109 workaround for PWM.
+
+// <0=> EGU0
+// <1=> EGU1
+// <2=> EGU2
+// <3=> EGU3
+// <4=> EGU4
+// <5=> EGU5
+
+#ifndef NRFX_PWM_NRF52_ANOMALY_109_EGU_INSTANCE
+#define NRFX_PWM_NRF52_ANOMALY_109_EGU_INSTANCE 5
 #endif
 
 // </e>
@@ -2968,134 +3042,6 @@
 #endif
 
 // </e>
-
-// </e>
-
-// <e> NRFX_QSPI_ENABLED - nrfx_qspi - QSPI peripheral driver
-//==========================================================
-#ifndef NRFX_QSPI_ENABLED
-#define NRFX_QSPI_ENABLED 0
-#endif
-// <o> NRFX_QSPI_CONFIG_SCK_DELAY - tSHSL, tWHSL and tSHWL in number of 16 MHz periods (62.5 ns).  <0-255>
-
-
-#ifndef NRFX_QSPI_CONFIG_SCK_DELAY
-#define NRFX_QSPI_CONFIG_SCK_DELAY 1
-#endif
-
-// <o> NRFX_QSPI_CONFIG_XIP_OFFSET - Address offset in the external memory for Execute in Place operation.
-#ifndef NRFX_QSPI_CONFIG_XIP_OFFSET
-#define NRFX_QSPI_CONFIG_XIP_OFFSET 0
-#endif
-
-// <o> NRFX_QSPI_CONFIG_READOC  - Number of data lines and opcode used for reading.
-
-// <0=> FastRead
-// <1=> Read2O
-// <2=> Read2IO
-// <3=> Read4O
-// <4=> Read4IO
-
-#ifndef NRFX_QSPI_CONFIG_READOC
-#define NRFX_QSPI_CONFIG_READOC 0
-#endif
-
-// <o> NRFX_QSPI_CONFIG_WRITEOC  - Number of data lines and opcode used for writing.
-
-// <0=> PP
-// <1=> PP2O
-// <2=> PP4O
-// <3=> PP4IO
-
-#ifndef NRFX_QSPI_CONFIG_WRITEOC
-#define NRFX_QSPI_CONFIG_WRITEOC 0
-#endif
-
-// <o> NRFX_QSPI_CONFIG_ADDRMODE  - Addressing mode.
-
-// <0=> 24bit
-// <1=> 32bit
-
-#ifndef NRFX_QSPI_CONFIG_ADDRMODE
-#define NRFX_QSPI_CONFIG_ADDRMODE 0
-#endif
-
-// <o> NRFX_QSPI_CONFIG_MODE  - SPI mode.
-
-// <0=> Mode 0
-// <1=> Mode 1
-
-#ifndef NRFX_QSPI_CONFIG_MODE
-#define NRFX_QSPI_CONFIG_MODE 0
-#endif
-
-// <o> NRFX_QSPI_CONFIG_FREQUENCY  - Frequency divider.
-
-// <0=> 32MHz/1
-// <1=> 32MHz/2
-// <2=> 32MHz/3
-// <3=> 32MHz/4
-// <4=> 32MHz/5
-// <5=> 32MHz/6
-// <6=> 32MHz/7
-// <7=> 32MHz/8
-// <8=> 32MHz/9
-// <9=> 32MHz/10
-// <10=> 32MHz/11
-// <11=> 32MHz/12
-// <12=> 32MHz/13
-// <13=> 32MHz/14
-// <14=> 32MHz/15
-// <15=> 32MHz/16
-
-#ifndef NRFX_QSPI_CONFIG_FREQUENCY
-#define NRFX_QSPI_CONFIG_FREQUENCY 15
-#endif
-
-// <s> NRFX_QSPI_PIN_SCK - SCK pin value.
-#ifndef NRFX_QSPI_PIN_SCK
-#define NRFX_QSPI_PIN_SCK NRF_QSPI_PIN_NOT_CONNECTED
-#endif
-
-// <s> NRFX_QSPI_PIN_CSN - CSN pin value.
-#ifndef NRFX_QSPI_PIN_CSN
-#define NRFX_QSPI_PIN_CSN NRF_QSPI_PIN_NOT_CONNECTED
-#endif
-
-// <s> NRFX_QSPI_PIN_IO0 - IO0 pin value.
-#ifndef NRFX_QSPI_PIN_IO0
-#define NRFX_QSPI_PIN_IO0 NRF_QSPI_PIN_NOT_CONNECTED
-#endif
-
-// <s> NRFX_QSPI_PIN_IO1 - IO1 pin value.
-#ifndef NRFX_QSPI_PIN_IO1
-#define NRFX_QSPI_PIN_IO1 NRF_QSPI_PIN_NOT_CONNECTED
-#endif
-
-// <s> NRFX_QSPI_PIN_IO2 - IO2 pin value.
-#ifndef NRFX_QSPI_PIN_IO2
-#define NRFX_QSPI_PIN_IO2 NRF_QSPI_PIN_NOT_CONNECTED
-#endif
-
-// <s> NRFX_QSPI_PIN_IO3 - IO3 pin value.
-#ifndef NRFX_QSPI_PIN_IO3
-#define NRFX_QSPI_PIN_IO3 NRF_QSPI_PIN_NOT_CONNECTED
-#endif
-
-// <o> NRFX_QSPI_CONFIG_IRQ_PRIORITY  - Interrupt priority
-
-// <0=> 0 (highest)
-// <1=> 1
-// <2=> 2
-// <3=> 3
-// <4=> 4
-// <5=> 5
-// <6=> 6
-// <7=> 7
-
-#ifndef NRFX_QSPI_CONFIG_IRQ_PRIORITY
-#define NRFX_QSPI_CONFIG_IRQ_PRIORITY 6
-#endif
 
 // </e>
 
@@ -3425,20 +3371,6 @@
 #define NRFX_SPIM2_ENABLED 0
 #endif
 
-// <q> NRFX_SPIM3_ENABLED  - Enable SPIM3 instance
-
-
-#ifndef NRFX_SPIM3_ENABLED
-#define NRFX_SPIM3_ENABLED 0
-#endif
-
-// <q> NRFX_SPIM_EXTENDED_ENABLED  - Enable extended SPIM features
-
-
-#ifndef NRFX_SPIM_EXTENDED_ENABLED
-#define NRFX_SPIM_EXTENDED_ENABLED 0
-#endif
-
 // <o> NRFX_SPIM_MISO_PULL_CFG  - MISO pin pull configuration.
 
 // <0=> NRF_GPIO_PIN_NOPULL
@@ -3514,6 +3446,20 @@
 #endif
 
 // </e>
+
+// <q> NRFX_SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 anomaly 109 workaround for SPIM.
+
+
+// <i> The workaround uses interrupts to wake up the CPU by catching
+// <i> a start event of zero-length transmission to start the clock. This
+// <i> ensures that the DMA transfer will be executed without issues and
+// <i> that the proper transfer will be started. See more in the Errata
+// <i> document or Anomaly 109 Addendum located at
+// <i> https://infocenter.nordicsemi.com/
+
+#ifndef NRFX_SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
 
 // </e>
 
@@ -3622,6 +3568,20 @@
 #endif
 
 // </e>
+
+// <q> NRFX_SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 Anomaly 109 workaround for SPIS.
+
+
+// <i> The workaround uses a GPIOTE channel to generate interrupts
+// <i> on falling edges detected on the CSN line. This will make
+// <i> the CPU active for the moment when SPIS starts DMA transfers,
+// <i> and this way the transfers will be protected.
+// <i> This workaround uses GPIOTE driver, so this driver must be
+// <i> enabled as well.
+
+#ifndef NRFX_SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
 
 // </e>
 
@@ -4083,6 +4043,19 @@
 
 // </e>
 
+// <q> NRFX_TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 anomaly 109 workaround for TWIM.
+
+
+// <i> The workaround uses interrupts to wake up the CPU by catching
+// <i> the start event of zero-frequency transmission, clear the
+// <i> peripheral, set desired frequency, start the peripheral, and
+// <i> the proper transmission. See more in the Errata document or
+// <i> Anomaly 109 Addendum located at https://infocenter.nordicsemi.com/
+
+#ifndef NRFX_TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
+
 // </e>
 
 // <e> NRFX_TWIS_ENABLED - nrfx_twis - TWIS peripheral driver
@@ -4331,12 +4304,7 @@
 #endif
 // <o> NRFX_UARTE0_ENABLED - Enable UARTE0 instance
 #ifndef NRFX_UARTE0_ENABLED
-#define NRFX_UARTE0_ENABLED 1
-#endif
-
-// <o> NRFX_UARTE1_ENABLED - Enable UARTE1 instance
-#ifndef NRFX_UARTE1_ENABLED
-#define NRFX_UARTE1_ENABLED 0
+#define NRFX_UARTE0_ENABLED 0
 #endif
 
 // <o> NRFX_UARTE_DEFAULT_CONFIG_HWFC  - Hardware Flow Control
@@ -4594,6 +4562,15 @@
 #define NRFX_WDT_CONFIG_RELOAD_VALUE 2000
 #endif
 
+// <o> NRFX_WDT_CONFIG_NO_IRQ  - Remove WDT IRQ handling from WDT driver
+
+// <0=> Include WDT IRQ handling
+// <1=> Remove WDT IRQ handling
+
+#ifndef NRFX_WDT_CONFIG_NO_IRQ
+#define NRFX_WDT_CONFIG_NO_IRQ 0
+#endif
+
 // <o> NRFX_WDT_CONFIG_IRQ_PRIORITY  - Interrupt priority
 
 // <0=> 0 (highest)
@@ -4677,6 +4654,13 @@
 
 #ifndef CLOCK_CONFIG_LF_SRC
 #define CLOCK_CONFIG_LF_SRC 1
+#endif
+
+// <q> CLOCK_CONFIG_LF_CAL_ENABLED  - Calibration enable for LF Clock Source
+
+
+#ifndef CLOCK_CONFIG_LF_CAL_ENABLED
+#define CLOCK_CONFIG_LF_CAL_ENABLED 0
 #endif
 
 // <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
@@ -4919,12 +4903,33 @@
 #define PWM2_ENABLED 0
 #endif
 
-// <q> PWM3_ENABLED  - Enable PWM3 instance
+// <e> PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED - Enables nRF52 Anomaly 109 workaround for PWM.
 
-
-#ifndef PWM3_ENABLED
-#define PWM3_ENABLED 0
+// <i> The workaround uses interrupts to wake up the CPU and ensure
+// <i> it is active when PWM is about to start a DMA transfer. For
+// <i> initial transfer, done when a playback is started via PPI,
+// <i> a specific EGU instance is used to generate the interrupt.
+// <i> During the playback, the PWM interrupt triggered on SEQEND
+// <i> event of a preceding sequence is used to protect the transfer
+// <i> done for the next sequence to be played.
+//==========================================================
+#ifndef PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
 #endif
+// <o> PWM_NRF52_ANOMALY_109_EGU_INSTANCE  - EGU instance used by the nRF52 Anomaly 109 workaround for PWM.
+
+// <0=> EGU0
+// <1=> EGU1
+// <2=> EGU2
+// <3=> EGU3
+// <4=> EGU4
+// <5=> EGU5
+
+#ifndef PWM_NRF52_ANOMALY_109_EGU_INSTANCE
+#define PWM_NRF52_ANOMALY_109_EGU_INSTANCE 5
+#endif
+
+// </e>
 
 // </e>
 
@@ -5396,6 +5401,20 @@
 #define SPIS2_ENABLED 0
 #endif
 
+// <q> SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 Anomaly 109 workaround for SPIS.
+
+
+// <i> The workaround uses a GPIOTE channel to generate interrupts
+// <i> on falling edges detected on the CSN line. This will make
+// <i> the CPU active for the moment when SPIS starts DMA transfers,
+// <i> and this way the transfers will be protected.
+// <i> This workaround uses GPIOTE driver, so this driver must be
+// <i> enabled as well.
+
+#ifndef SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
+
 // </e>
 
 // <e> SPI_ENABLED - nrf_drv_spi - SPI/SPIM peripheral driver - legacy layer
@@ -5471,6 +5490,20 @@
 #endif
 
 // </e>
+
+// <q> SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 anomaly 109 workaround for SPIM.
+
+
+// <i> The workaround uses interrupts to wake up the CPU by catching
+// <i> a start event of zero-length transmission to start the clock. This
+// <i> ensures that the DMA transfer will be executed without issues and
+// <i> that the proper transfer will be started. See more in the Errata
+// <i> document or Anomaly 109 Addendum located at
+// <i> https://infocenter.nordicsemi.com/
+
+#ifndef SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
 
 // </e>
 
@@ -5730,6 +5763,19 @@
 
 // </e>
 
+// <q> TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 anomaly 109 workaround for TWIM.
+
+
+// <i> The workaround uses interrupts to wake up the CPU by catching
+// <i> the start event of zero-frequency transmission, clear the
+// <i> peripheral, set desired frequency, start the peripheral, and
+// <i> the proper transmission. See more in the Errata document or
+// <i> Anomaly 109 Addendum located at https://infocenter.nordicsemi.com/
+
+#ifndef TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
+
 // </e>
 
 // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver - legacy layer
@@ -5823,16 +5869,9 @@
 
 // </e>
 
-// <e> UART1_ENABLED - Enable UART1 instance
-//==========================================================
-#ifndef UART1_ENABLED
-#define UART1_ENABLED 0
-#endif
 // </e>
 
-// </e>
-
-// <e> USBD_ENABLED - nrf_drv_usbd - USB driver
+// <e> USBD_ENABLED - nrf_drv_usbd - Software Component
 //==========================================================
 #ifndef USBD_ENABLED
 #define USBD_ENABLED 0
@@ -5930,6 +5969,18 @@
 
 // </e>
 
+// <h> nrfx_qspi - QSPI peripheral driver
+
+//==========================================================
+// </h>
+//==========================================================
+
+// <h> nrfx_usbd - USBD peripheral driver
+
+//==========================================================
+// </h>
+//==========================================================
+
 // </h>
 //==========================================================
 
@@ -5949,6 +6000,13 @@
 // <h> nRF_Libraries
 
 //==========================================================
+// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
+
+
+#ifndef APP_FIFO_ENABLED
+#define APP_FIFO_ENABLED 1
+#endif
+
 // <q> APP_GPIOTE_ENABLED  - app_gpiote - GPIOTE events dispatcher
 
 
@@ -6139,7 +6197,6 @@
 
 // </e>
 
-
 // <q> APP_USBD_AUDIO_ENABLED  - app_usbd_audio - USB AUDIO class
 
 
@@ -6201,7 +6258,7 @@
 
 
 #ifndef APP_USBD_CONFIG_MAX_POWER
-#define APP_USBD_CONFIG_MAX_POWER 500
+#define APP_USBD_CONFIG_MAX_POWER 100
 #endif
 
 // <q> APP_USBD_CONFIG_POWER_EVENTS_PROCESS  - Process power events.
@@ -6515,6 +6572,15 @@
 
 #ifndef FDS_VIRTUAL_PAGE_SIZE
 #define FDS_VIRTUAL_PAGE_SIZE 1024
+#endif
+
+// <o> FDS_VIRTUAL_PAGES_RESERVED - The number of virtual flash pages that are used by other modules.
+// <i> FDS module stores its data in the last pages of the flash memory.
+// <i> By setting this value, you can move flash end address used by the FDS.
+// <i> As a result the reserved space can be used by other modules.
+
+#ifndef FDS_VIRTUAL_PAGES_RESERVED
+#define FDS_VIRTUAL_PAGES_RESERVED 0
 #endif
 
 // </h>
@@ -7001,13 +7067,6 @@
 
 // </e>
 
-// <q> NRF_FPRINTF_ENABLED  - nrf_fprintf - fprintf function.
-
-
-#ifndef NRF_FPRINTF_ENABLED
-#define NRF_FPRINTF_ENABLED 1
-#endif
-
 // <e> NRF_FSTORAGE_ENABLED - nrf_fstorage - Flash abstraction library
 //==========================================================
 #ifndef NRF_FSTORAGE_ENABLED
@@ -7125,22 +7184,6 @@
 // <29=> 29 (P0.29)
 // <30=> 30 (P0.30)
 // <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
 // <4294967295=> Not connected
 
 #ifndef NRF_PWR_MGMT_SLEEP_DEBUG_PIN
@@ -7249,6 +7292,13 @@
 
 #ifndef NRF_TWI_MNGR_ENABLED
 #define NRF_TWI_MNGR_ENABLED 0
+#endif
+
+// <q> RETARGET_ENABLED  - retarget - Retargeting stdio functions
+
+
+#ifndef RETARGET_ENABLED
+#define RETARGET_ENABLED 1
 #endif
 
 // <q> SLIP_ENABLED  - slip - SLIP encoding and decoding
@@ -7446,6 +7496,26 @@
 // </h>
 //==========================================================
 
+// <h> nrf_fprintf - fprintf function.
+
+//==========================================================
+// <q> NRF_FPRINTF_ENABLED  - Enable/disable fprintf module.
+
+
+#ifndef NRF_FPRINTF_ENABLED
+#define NRF_FPRINTF_ENABLED 1
+#endif
+
+// <q> NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED  - For each printed LF, function will add CR.
+
+
+#ifndef NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED
+#define NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED 1
+#endif
+
+// </h>
+//==========================================================
+
 // </h>
 //==========================================================
 
@@ -7481,51 +7551,6 @@
 
 #ifndef NRF_LOG_BACKEND_RTT_TX_RETRY_CNT
 #define NRF_LOG_BACKEND_RTT_TX_RETRY_CNT 3
-#endif
-
-// </e>
-
-// <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
-//==========================================================
-#ifndef NRF_LOG_BACKEND_UART_ENABLED
-#define NRF_LOG_BACKEND_UART_ENABLED 0
-#endif
-// <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin
-#ifndef NRF_LOG_BACKEND_UART_TX_PIN
-#define NRF_LOG_BACKEND_UART_TX_PIN 6
-#endif
-
-// <o> NRF_LOG_BACKEND_UART_BAUDRATE  - Default Baudrate
-
-// <323584=> 1200 baud
-// <643072=> 2400 baud
-// <1290240=> 4800 baud
-// <2576384=> 9600 baud
-// <3862528=> 14400 baud
-// <5152768=> 19200 baud
-// <7716864=> 28800 baud
-// <10289152=> 38400 baud
-// <15400960=> 57600 baud
-// <20615168=> 76800 baud
-// <30801920=> 115200 baud
-// <61865984=> 230400 baud
-// <67108864=> 250000 baud
-// <121634816=> 460800 baud
-// <251658240=> 921600 baud
-// <268435456=> 1000000 baud
-
-#ifndef NRF_LOG_BACKEND_UART_BAUDRATE
-#define NRF_LOG_BACKEND_UART_BAUDRATE 30801920
-#endif
-
-// <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.
-// <i> Size of the buffer is a trade-off between RAM usage and processing.
-// <i> if buffer is smaller then strings will often be fragmented.
-// <i> It is recommended to use size which will fit typical log and only the
-// <i> longer one will be fragmented.
-
-#ifndef NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE
-#define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 64
 #endif
 
 // </e>
@@ -7605,7 +7630,7 @@
 // <4=> Debug
 
 #ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_LOG_DEFAULT_LEVEL 4
 #endif
 
 // <q> NRF_LOG_DEFERRED  - Enable deffered logger.
@@ -7727,12 +7752,12 @@
 // <h> nrf_log in nRF_Core
 
 //==========================================================
-// <e> NRF_MPU_CONFIG_LOG_ENABLED - Enables logging in the module.
+// <e> NRF_MPU_LIB_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
-#ifndef NRF_MPU_CONFIG_LOG_ENABLED
-#define NRF_MPU_CONFIG_LOG_ENABLED 0
+#ifndef NRF_MPU_LIB_CONFIG_LOG_ENABLED
+#define NRF_MPU_LIB_CONFIG_LOG_ENABLED 0
 #endif
-// <o> NRF_MPU_CONFIG_LOG_LEVEL  - Default Severity level
+// <o> NRF_MPU_LIB_CONFIG_LOG_LEVEL  - Default Severity level
 
 // <0=> Off
 // <1=> Error
@@ -7740,11 +7765,11 @@
 // <3=> Info
 // <4=> Debug
 
-#ifndef NRF_MPU_CONFIG_LOG_LEVEL
-#define NRF_MPU_CONFIG_LOG_LEVEL 3
+#ifndef NRF_MPU_LIB_CONFIG_LOG_LEVEL
+#define NRF_MPU_LIB_CONFIG_LOG_LEVEL 3
 #endif
 
-// <o> NRF_MPU_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> NRF_MPU_LIB_CONFIG_INFO_COLOR  - ANSI escape code prefix.
 
 // <0=> Default
 // <1=> Black
@@ -7756,11 +7781,11 @@
 // <7=> Cyan
 // <8=> White
 
-#ifndef NRF_MPU_CONFIG_INFO_COLOR
-#define NRF_MPU_CONFIG_INFO_COLOR 0
+#ifndef NRF_MPU_LIB_CONFIG_INFO_COLOR
+#define NRF_MPU_LIB_CONFIG_INFO_COLOR 0
 #endif
 
-// <o> NRF_MPU_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> NRF_MPU_LIB_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
 
 // <0=> Default
 // <1=> Black
@@ -7772,8 +7797,8 @@
 // <7=> Cyan
 // <8=> White
 
-#ifndef NRF_MPU_CONFIG_DEBUG_COLOR
-#define NRF_MPU_CONFIG_DEBUG_COLOR 0
+#ifndef NRF_MPU_LIB_CONFIG_DEBUG_COLOR
+#define NRF_MPU_LIB_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
@@ -8137,6 +8162,57 @@
 
 #ifndef MAX3421E_HOST_CONFIG_DEBUG_COLOR
 #define MAX3421E_HOST_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> NRFX_USBD_CONFIG_LOG_ENABLED - Enable logging in the module
+//==========================================================
+#ifndef NRFX_USBD_CONFIG_LOG_ENABLED
+#define NRFX_USBD_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_USBD_CONFIG_LOG_LEVEL  - Default Severity level
+
+// <0=> Off
+// <1=> Error
+// <2=> Warning
+// <3=> Info
+// <4=> Debug
+
+#ifndef NRFX_USBD_CONFIG_LOG_LEVEL
+#define NRFX_USBD_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRFX_USBD_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+
+// <0=> Default
+// <1=> Black
+// <2=> Red
+// <3=> Green
+// <4=> Yellow
+// <5=> Blue
+// <6=> Magenta
+// <7=> Cyan
+// <8=> White
+
+#ifndef NRFX_USBD_CONFIG_INFO_COLOR
+#define NRFX_USBD_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRFX_USBD_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+
+// <0=> Default
+// <1=> Black
+// <2=> Red
+// <3=> Green
+// <4=> Yellow
+// <5=> Blue
+// <6=> Magenta
+// <7=> Cyan
+// <8=> White
+
+#ifndef NRFX_USBD_CONFIG_DEBUG_COLOR
+#define NRFX_USBD_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
@@ -10720,692 +10796,6 @@
 #define NFC_NDEF_URI_REC_ENABLED 0
 #endif
 
-// <e> NFC_T2T_HAL_ENABLED - nfc_t2t_hal - Hardware Abstraction Layer for NFC library.
-//==========================================================
-#ifndef NFC_T2T_HAL_ENABLED
-#define NFC_T2T_HAL_ENABLED 0
-#endif
-// <o> NFCT_CONFIG_IRQ_PRIORITY  - Interrupt priority
-
-
-// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-// <0=> 0 (highest)
-// <1=> 1
-// <2=> 2
-// <3=> 3
-// <4=> 4
-// <5=> 5
-// <6=> 6
-// <7=> 7
-
-#ifndef NFCT_CONFIG_IRQ_PRIORITY
-#define NFCT_CONFIG_IRQ_PRIORITY 6
-#endif
-
-// <e> HAL_NFC_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_LOG_ENABLED
-#define HAL_NFC_CONFIG_LOG_ENABLED 0
-#endif
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
-
-// <0=> Off
-// <1=> Error
-// <2=> Warning
-// <3=> Info
-// <4=> Debug
-
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
-
-// <0=> Off
-// <1=> Error
-// <2=> Warning
-// <3=> Info
-// <4=> Debug
-
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
-#endif
-
-// </e>
-
-// <e> HAL_NFC_CONFIG_DEBUG_PIN_ENABLED - Enables pin debug in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_DEBUG_PIN_ENABLED
-#define HAL_NFC_CONFIG_DEBUG_PIN_ENABLED 0
-#endif
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 11
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 12
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 24
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 25
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 28
-#endif
-
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 31
-#endif
-
-// </e>
-
-// </e>
-
 // <e> NFC_T2T_PARSER_ENABLED - nfc_type_2_tag_parser - Parser for decoding Type 2 Tag data
 //==========================================================
 #ifndef NFC_T2T_PARSER_ENABLED
@@ -11532,692 +10922,6 @@
 
 // </e>
 
-// <e> NFC_T4T_HAL_ENABLED - nfc_t4t_hal - Hardware Abstraction Layer for NFC library.
-//==========================================================
-#ifndef NFC_T4T_HAL_ENABLED
-#define NFC_T4T_HAL_ENABLED 0
-#endif
-// <o> NFCT_CONFIG_IRQ_PRIORITY  - Interrupt priority
-
-
-// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-// <0=> 0 (highest)
-// <1=> 1
-// <2=> 2
-// <3=> 3
-// <4=> 4
-// <5=> 5
-// <6=> 6
-// <7=> 7
-
-#ifndef NFCT_CONFIG_IRQ_PRIORITY
-#define NFCT_CONFIG_IRQ_PRIORITY 6
-#endif
-
-// <e> HAL_NFC_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_LOG_ENABLED
-#define HAL_NFC_CONFIG_LOG_ENABLED 0
-#endif
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
-
-// <0=> Off
-// <1=> Error
-// <2=> Warning
-// <3=> Info
-// <4=> Debug
-
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
-
-// <0=> Off
-// <1=> Error
-// <2=> Warning
-// <3=> Info
-// <4=> Debug
-
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
-#endif
-
-// </e>
-
-// <e> HAL_NFC_CONFIG_DEBUG_PIN_ENABLED - Enables pin debug in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_DEBUG_PIN_ENABLED
-#define HAL_NFC_CONFIG_DEBUG_PIN_ENABLED 0
-#endif
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
-
-// <0=> 0 (P0.0)
-// <1=> 1 (P0.1)
-// <2=> 2 (P0.2)
-// <3=> 3 (P0.3)
-// <4=> 4 (P0.4)
-// <5=> 5 (P0.5)
-// <6=> 6 (P0.6)
-// <7=> 7 (P0.7)
-// <8=> 8 (P0.8)
-// <9=> 9 (P0.9)
-// <10=> 10 (P0.10)
-// <11=> 11 (P0.11)
-// <12=> 12 (P0.12)
-// <13=> 13 (P0.13)
-// <14=> 14 (P0.14)
-// <15=> 15 (P0.15)
-// <16=> 16 (P0.16)
-// <17=> 17 (P0.17)
-// <18=> 18 (P0.18)
-// <19=> 19 (P0.19)
-// <20=> 20 (P0.20)
-// <21=> 21 (P0.21)
-// <22=> 22 (P0.22)
-// <23=> 23 (P0.23)
-// <24=> 24 (P0.24)
-// <25=> 25 (P0.25)
-// <26=> 26 (P0.26)
-// <27=> 27 (P0.27)
-// <28=> 28 (P0.28)
-// <29=> 29 (P0.29)
-// <30=> 30 (P0.30)
-// <31=> 31 (P0.31)
-// <32=> 32 (P1.0)
-// <33=> 33 (P1.1)
-// <34=> 34 (P1.2)
-// <35=> 35 (P1.3)
-// <36=> 36 (P1.4)
-// <37=> 37 (P1.5)
-// <38=> 38 (P1.6)
-// <39=> 39 (P1.7)
-// <40=> 40 (P1.8)
-// <41=> 41 (P1.9)
-// <42=> 42 (P1.10)
-// <43=> 43 (P1.11)
-// <44=> 44 (P1.12)
-// <45=> 45 (P1.13)
-// <46=> 46 (P1.14)
-// <47=> 47 (P1.15)
-// <4294967295=> Not connected
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 31
-#endif
-
-// </e>
-
-// </e>
-
 // <e> NFC_T4T_HL_DETECTION_PROCEDURES_ENABLED - nfc_t4t_hl_detection_procedures - NDEF Detection Procedure for Type 4 Tag
 //==========================================================
 #ifndef NFC_T4T_HL_DETECTION_PROCEDURES_ENABLED
@@ -12329,17 +11033,17 @@
 #define SEGGER_RTT_CONFIG_BUFFER_SIZE_UP 512
 #endif
 
-// <o> SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS - Size of upstream buffer.
+// <o> SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS - Maximum number of upstream buffers.
 #ifndef SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS
 #define SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS 2
 #endif
 
-// <o> SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN - Size of upstream buffer.
+// <o> SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN - Size of downstream buffer.
 #ifndef SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN
 #define SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN 16
 #endif
 
-// <o> SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS - Size of upstream buffer.
+// <o> SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS - Maximum number of downstream buffers.
 #ifndef SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS
 #define SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS 2
 #endif
@@ -12384,12 +11088,12 @@
 // <i> Requested BLE GAP data length to be negotiated.
 
 #ifndef NRF_SDH_BLE_GAP_DATA_LENGTH
-#define NRF_SDH_BLE_GAP_DATA_LENGTH 27
+#define NRF_SDH_BLE_GAP_DATA_LENGTH 251
 #endif
 
 // <o> NRF_SDH_BLE_PERIPHERAL_LINK_COUNT - Maximum number of peripheral links.
 #ifndef NRF_SDH_BLE_PERIPHERAL_LINK_COUNT
-#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 2
+#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
 #endif
 
 // <o> NRF_SDH_BLE_CENTRAL_LINK_COUNT - Maximum number of central links.
@@ -12401,7 +11105,7 @@
 // <i> Maximum number of total concurrent connections using the default configuration.
 
 #ifndef NRF_SDH_BLE_TOTAL_LINK_COUNT
-#define NRF_SDH_BLE_TOTAL_LINK_COUNT 2
+#define NRF_SDH_BLE_TOTAL_LINK_COUNT 1
 #endif
 
 // <o> NRF_SDH_BLE_GAP_EVENT_LENGTH - GAP event length.
@@ -12413,17 +11117,17 @@
 
 // <o> NRF_SDH_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size.
 #ifndef NRF_SDH_BLE_GATT_MAX_MTU_SIZE
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 23
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 247
 #endif
 
 // <o> NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE - Attribute Table size in bytes. The size must be a multiple of 4.
 #ifndef NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE
-#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1408
+#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1508
 #endif
 
 // <o> NRF_SDH_BLE_VS_UUID_COUNT - The number of vendor-specific UUIDs.
 #ifndef NRF_SDH_BLE_VS_UUID_COUNT
-#define NRF_SDH_BLE_VS_UUID_COUNT 10
+#define NRF_SDH_BLE_VS_UUID_COUNT 3
 #endif
 
 // <q> NRF_SDH_BLE_SERVICE_CHANGED  - Include the Service Changed characteristic in the Attribute Table.
@@ -12630,20 +11334,6 @@
 
 #ifndef BLE_NUS_C_BLE_OBSERVER_PRIO
 #define BLE_NUS_C_BLE_OBSERVER_PRIO 2
-#endif
-
-// <o> BLE_ITS_BLE_OBSERVER_PRIO
-// <i> Priority with which BLE events are dispatched to the ITS Service.
-
-#ifndef BLE_ITS_BLE_OBSERVER_PRIO
-#define BLE_ITS_BLE_OBSERVER_PRIO 2
-#endif
-
-// <o> BLE_ITS_C_BLE_OBSERVER_PRIO
-// <i> Priority with which BLE events are dispatched to the ITS Central Client.
-
-#ifndef BLE_ITS_C_BLE_OBSERVER_PRIO
-#define BLE_ITS_C_BLE_OBSERVER_PRIO 2
 #endif
 
 // <o> BLE_OTS_BLE_OBSERVER_PRIO
