@@ -94,8 +94,11 @@
 #define CONNECTED_LED                   BSP_BOARD_LED_1                         /**< Is on when device has connected. */
 #define LEDBUTTON_LED                   BSP_BOARD_LED_2                         /**< LED to be toggled with the help of the LED Button Service. */
 #define LEDBUTTON_BUTTON                BSP_BUTTON_0                            /**< Button that will trigger the notification event with the LED Button Service */
+#define ADV_BUTTON                      BSP_BUTTON_1
+#define SCAN_BUTTON                     BSP_BUTTON_2
+#define PRINT_BUTTON                    BSP_BUTTON_3
 
-#define DEVICE_NAME                     "Multi_Role"                         /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "LBS_NUS_Node"                         /**< Name of device. Will be included in the advertising data. */
 
 #define LINK_TOTAL                      NRF_SDH_BLE_PERIPHERAL_LINK_COUNT + \
         NRF_SDH_BLE_CENTRAL_LINK_COUNT
@@ -176,6 +179,21 @@ static uint16_t m_ble_its_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3; /**< Maxi
 
 static char const m_target_periph_name[] = "LBS_NUS_Node";     /**< Name of the device we try to connect to. This name is searched in the scan report data*/
 
+
+typedef struct
+{
+        bool is_connected;
+        ble_gap_addr_t address;
+} conn_peer_t;
+
+static char * roles_str[] =
+{
+        "INVALID_ROLE",
+        "PERIPHERAL",
+        "CENTRAL",
+};
+
+static conn_peer_t m_connected_peers[NRF_SDH_BLE_TOTAL_LINK_COUNT];                                /**< Array of connected peers. */
 
 /**@brief Struct that contains pointers to the encoded advertising data. */
 static ble_gap_adv_data_t m_adv_data =
@@ -299,7 +317,7 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
         {
                 uint32_t err_code;
 
-                NRF_LOG_INFO("Receive the BLE UART data");
+                NRF_LOG_DEBUG("Receive the BLE UART data");
                 for (uint32_t i = 0; i < p_evt->params.rx_data.length; i++)
                 {
                         do
@@ -320,11 +338,11 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
         }
         else if (p_evt->type == BLE_NUS_EVT_COMM_STARTED)
         {
-                NRF_LOG_INFO("NUS : BLE_NUS_EVT_COMM_STARTED");
+                NRF_LOG_DEBUG("NUS : BLE_NUS_EVT_COMM_STARTED");
         }
         else if (p_evt->type == BLE_NUS_EVT_COMM_STOPPED)
         {
-                NRF_LOG_INFO("NUS : BLE_NUS_EVT_COMM_STOPPED");
+                NRF_LOG_DEBUG("NUS : BLE_NUS_EVT_COMM_STOPPED");
         }
 }
 /**@snippet [Handling the data received over BLE] */
@@ -336,6 +354,7 @@ static void scan_start(void)
 {
         ret_code_t err_code;
 
+        NRF_LOG_INFO("Start to Scanning!!")
         err_code = nrf_ble_scan_start(&m_scan);
         APP_ERROR_CHECK(err_code);
 
@@ -433,7 +452,6 @@ static void db_discovery_init(void)
         APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for handling events from the GATT library. */
 void gatt_evt_handler(nrf_ble_gatt_t * p_gatt, nrf_ble_gatt_evt_t const * p_evt)
 {
@@ -445,14 +463,14 @@ void gatt_evt_handler(nrf_ble_gatt_t * p_gatt, nrf_ble_gatt_evt_t const * p_evt)
 
                 m_ble_nus_max_data_len = p_evt->params.att_mtu_effective - OPCODE_LENGTH - HANDLE_LENGTH;
                 m_ble_its_max_data_len = p_evt->params.att_mtu_effective - OPCODE_LENGTH - HANDLE_LENGTH;
-                NRF_LOG_INFO("gatt_event: ATT MTU is set to 0x%X (%d)", data_length, data_length);
+                NRF_LOG_DEBUG("gatt_event: ATT MTU is set to 0x%X (%d)", data_length, data_length);
         }
         else if ((m_conn_handle == p_evt->conn_handle) && (p_evt->evt_id == NRF_BLE_GATT_EVT_DATA_LENGTH_UPDATED))
         {
                 data_length = p_evt->params.att_mtu_effective - OPCODE_LENGTH - HANDLE_LENGTH - 4;
                 m_ble_nus_max_data_len = p_evt->params.att_mtu_effective - OPCODE_LENGTH - HANDLE_LENGTH;
                 m_ble_its_max_data_len = p_evt->params.att_mtu_effective - OPCODE_LENGTH - HANDLE_LENGTH;
-                NRF_LOG_INFO("gatt_event: Data len is set to 0x%X (%d)", data_length, data_length);
+                NRF_LOG_DEBUG("gatt_event: Data len is set to 0x%X (%d)", data_length, data_length);
         }
         //NRF_LOG_DEBUG("ATT MTU exchange completed. central 0x%x peripheral 0x%x",
         //            p_gatt->att_mtu_desired_central,
@@ -547,12 +565,12 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
         if (led_state)
         {
                 bsp_board_led_on(LEDBUTTON_LED);
-                NRF_LOG_INFO("Received LED ON!");
+                NRF_LOG_DEBUG("Received LED ON!");
         }
         else
         {
                 bsp_board_led_off(LEDBUTTON_LED);
-                NRF_LOG_INFO("Received LED OFF!");
+                NRF_LOG_DEBUG("Received LED OFF!");
         }
 }
 /**@brief   Function for handling app_uart events.
@@ -580,7 +598,7 @@ void uart_event_handle(app_uart_evt_t * p_event)
                 {
                         if (index > 1)
                         {
-                                NRF_LOG_INFO("Ready to send data over BLE NUS");
+                                NRF_LOG_DEBUG("Ready to send data over BLE NUS");
                                 NRF_LOG_HEXDUMP_INFO(data_array, index);
                                 do
                                 {
@@ -663,7 +681,7 @@ static void services_init(void)
         // Initialize Queued Write Module instances.
         qwr_init.error_handler = nrf_qwr_error_handler;
 
-        for (uint32_t i = 0; i < LINK_TOTAL; i++)
+        for (uint32_t i = 0; i < NRF_SDH_BLE_TOTAL_LINK_COUNT; i++)
         {
                 err_code = nrf_ble_qwr_init(&m_qwr[i], &qwr_init);
                 APP_ERROR_CHECK(err_code);
@@ -757,6 +775,8 @@ static void advertising_start(void)
 {
         ret_code_t err_code;
 
+        NRF_LOG_INFO("Start to advertising!");
+
         err_code = sd_ble_gap_adv_start(m_adv_handle, APP_BLE_CONN_CFG_TAG);
         APP_ERROR_CHECK(err_code);
 
@@ -786,31 +806,15 @@ static void on_peripheral_connected(ble_gap_evt_t const * p_gap_evt)
                 advertising_start();
         }
 
-        // NRF_LOG_INFO("Connected");
-        // bsp_board_led_on(CONNECTED_LED);
-        // bsp_board_led_off(ADVERTISING_LED);
-        // m_conn_handle = p_gap_evt->conn_handle;
-        // err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
-        // APP_ERROR_CHECK(err_code);
-        // err_code = app_button_enable();
-        // APP_ERROR_CHECK(err_code);
-        // tx_power_set();
 }
 
 
 static void on_peripheral_disconnected(ble_gap_evt_t const * p_gap_evt)
 {
-        // ret_code_t err_code;
-        // NRF_LOG_INFO("Disconnected");
-        // bsp_board_led_off(CONNECTED_LED);
-        // m_conn_handle = BLE_CONN_HANDLE_INVALID;
-        // err_code = app_button_disable();
-        // APP_ERROR_CHECK(err_code);
-        // advertising_start();
 
         ret_code_t err_code;
 
-        NRF_LOG_INFO("on_peripheral_disconnected");
+        NRF_LOG_DEBUG("on_peripheral_disconnected");
 
         uint32_t periph_link_cnt = ble_conn_state_peripheral_conn_count();    // Number of peripheral links.
 
@@ -865,7 +869,6 @@ static void on_central_connected(ble_gap_evt_t const * p_gap_evt)
         else
         {
                 // Resume scanning.
-                // bsp_board_led_on(CENTRAL_SCANNING_LED);
                 scan_start();
         }
 
@@ -874,6 +877,70 @@ static void on_central_connected(ble_gap_evt_t const * p_gap_evt)
 static void on_central_disconnected(ble_gap_evt_t const * p_gap_evt)
 {
         ret_code_t err_code;
+}
+
+/**@brief Function for checking whether a link already exists with a newly connected peer.
+ *
+ * @details This function checks whether the newly connected device is already connected.
+ *
+ * @param[in]   p_connected_evt Bluetooth connected event.
+ * @return                      True if the peer's address is found in the list of connected peers,
+ *                              false otherwise.
+ */
+static bool is_already_connected(ble_gap_addr_t const * p_connected_adr)
+{
+        for (uint32_t i = 0; i < NRF_SDH_BLE_TOTAL_LINK_COUNT; i++)
+        {
+                if (m_connected_peers[i].is_connected)
+                {
+                        if (m_connected_peers[i].address.addr_type == p_connected_adr->addr_type)
+                        {
+                                if (memcmp(m_connected_peers[i].address.addr,
+                                           p_connected_adr->addr,
+                                           sizeof(m_connected_peers[i].address.addr)) == 0)
+                                {
+                                        return true;
+                                }
+                        }
+                }
+        }
+        return false;
+}
+
+static void print_connection_status(void)
+{
+        for (uint8_t i = 0; i < NRF_SDH_BLE_TOTAL_LINK_COUNT; i++)
+        {
+                if (m_connected_peers[i].is_connected)
+                {
+                        // NRF_LOG_INFO("%02d, Connecting to target 0x%02x%02x%02x%02x%02x%02x", i,  \
+                        //              m_connected_peers[i].address.addr[5],  \
+                        //              m_connected_peers[i].address.addr[4],  \
+                        //              m_connected_peers[i].address.addr[3],  \
+                        //              m_connected_peers[i].address.addr[2],  \
+                        //              m_connected_peers[i].address.addr[1],  \
+                        //              m_connected_peers[i].address.addr[0],  \
+                        //              );
+                }
+
+        }
+
+}
+/**@brief Function for assigning new connection handle to the available instance of QWR module.
+ *
+ * @param[in] conn_handle New connection handle.
+ */
+static void multi_qwr_conn_handle_assign(uint16_t conn_handle)
+{
+        for (uint32_t i = 0; i < NRF_SDH_BLE_TOTAL_LINK_COUNT; i++)
+        {
+                if (m_qwr[i].conn_handle == BLE_CONN_HANDLE_INVALID)
+                {
+                        ret_code_t err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr[i], conn_handle);
+                        APP_ERROR_CHECK(err_code);
+                        break;
+                }
+        }
 }
 
 /**@brief Function for handling BLE events.
@@ -885,29 +952,41 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
         ret_code_t err_code;
         // For readability.
+        uint16_t conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+
+        uint16_t role        = ble_conn_state_role(conn_handle);
         ble_gap_evt_t const * p_gap_evt = &p_ble_evt->evt.gap_evt;
+
+        if (    (p_ble_evt->header.evt_id == BLE_GAP_EVT_CONNECTED)
+                &&  (is_already_connected(&p_ble_evt->evt.gap_evt.params.connected.peer_addr)))
+        {
+                NRF_LOG_INFO("%s: Already connected to this device as %s (handle: %d), disconnecting.",
+                             (role == BLE_GAP_ROLE_PERIPH) ? "PERIPHERAL" : "CENTRAL",
+                             (role == BLE_GAP_ROLE_PERIPH) ? "CENTRAL"    : "PERIPHERAL",
+                             conn_handle);
+
+                (void)sd_ble_gap_disconnect(conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+
+                // Do not process the event further.
+                return;
+        }
 
         switch (p_ble_evt->header.evt_id)
         {
         case BLE_GAP_EVT_CONNECTED:
 
                 // Assign connection handle to available instance of QWR module.
-                for (uint32_t i = 0; i < NRF_SDH_BLE_PERIPHERAL_LINK_COUNT; i++)
-                {
-                        if (m_qwr[i].conn_handle == BLE_CONN_HANDLE_INVALID)
-                        {
-                                err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr[i], p_gap_evt->conn_handle);
-                                APP_ERROR_CHECK(err_code);
-                                break;
-                        }
-                }
+                multi_qwr_conn_handle_assign(conn_handle);
+
+                m_connected_peers[conn_handle].is_connected = true;
+                m_connected_peers[conn_handle].address = p_ble_evt->evt.gap_evt.params.connected.peer_addr;
 
                 // Handle central connections
                 if (p_gap_evt->params.connected.role == BLE_GAP_ROLE_PERIPH)
                 {
                         on_peripheral_connected(p_gap_evt);
                 }
-                else if (p_gap_evt->params.connected.role == BLE_GAP_ROLE_CENTRAL)
+                else if ((p_gap_evt->params.connected.role == BLE_GAP_ROLE_CENTRAL) || (p_ble_evt->header.evt_id == BLE_GAP_EVT_ADV_REPORT))
                 {
                         on_central_connected(p_gap_evt);
                 }
@@ -918,6 +997,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                              p_gap_evt->conn_handle,
                              p_gap_evt->params.disconnected.reason);
                 NRF_LOG_INFO("p_gap_evt->params.connected.role = %x", p_gap_evt->params.connected.role);
+                memset(&m_connected_peers[conn_handle], 0x00, sizeof(m_connected_peers[0]));
 
                 // Handle central connections
                 if (p_gap_evt->params.connected.role == BLE_GAP_ROLE_PERIPH)
@@ -1030,19 +1110,19 @@ static void ble_nus_c_evt_handler(ble_nus_c_t * p_ble_nus_c, ble_nus_c_evt_t con
         switch (p_ble_nus_c_evt->evt_type)
         {
         case BLE_NUS_C_EVT_DISCOVERY_COMPLETE:
-                NRF_LOG_INFO("NUS Service discovered on conn_handle 0x%x",
-                             p_ble_nus_c_evt->conn_handle);
+                NRF_LOG_DEBUG("NUS Service discovered on conn_handle 0x%x",
+                              p_ble_nus_c_evt->conn_handle);
 
                 err_code = ble_nus_c_handles_assign(p_ble_nus_c, p_ble_nus_c_evt->conn_handle, &p_ble_nus_c_evt->handles);
                 APP_ERROR_CHECK(err_code);
 
 
-                NRF_LOG_INFO("Before enable the tx notification");
+                NRF_LOG_DEBUG("Before enable the tx notification");
                 NRF_LOG_HEXDUMP_DEBUG(p_ble_nus_c, sizeof(ble_nus_c_t));
                 err_code = ble_nus_c_tx_notif_enable(p_ble_nus_c);
                 APP_ERROR_CHECK(err_code);
 
-                NRF_LOG_INFO("Connected to device with Nordic UART Service.\n\n");
+                NRF_LOG_DEBUG("Connected to device with Nordic UART Service.\n\n");
                 break;
 
         case BLE_NUS_C_EVT_NUS_TX_EVT:
@@ -1050,7 +1130,7 @@ static void ble_nus_c_evt_handler(ble_nus_c_t * p_ble_nus_c, ble_nus_c_evt_t con
                 break;
 
         case BLE_NUS_C_EVT_DISCONNECTED:
-                NRF_LOG_INFO("Disconnected.");
+                NRF_LOG_DEBUG("Disconnected.");
                 // scan_start();
                 break;
         }
@@ -1069,7 +1149,7 @@ static void lbs_c_evt_handler(ble_lbs_c_t * p_lbs_c, ble_lbs_c_evt_t * p_lbs_c_e
 //                err_code = ble_lbs_c_handles_assign(&m_ble_lbs_c,
 //                                                     p_lbs_c_evt->conn_handle,
 //                                                     &p_lbs_c_evt->params.peer_db);
-                NRF_LOG_INFO("LED Button service discovered on conn_handle 0x%x.", p_lbs_c_evt->conn_handle);
+                NRF_LOG_DEBUG("LED Button service discovered on conn_handle 0x%x.", p_lbs_c_evt->conn_handle);
 
 
 
@@ -1086,9 +1166,9 @@ static void lbs_c_evt_handler(ble_lbs_c_t * p_lbs_c, ble_lbs_c_evt_t * p_lbs_c_e
 
         case BLE_LBS_C_EVT_BUTTON_NOTIFICATION:
         {
-                NRF_LOG_INFO("Link 0x%x, Button state changed on peer to 0x%x",
-                             p_lbs_c_evt->conn_handle,
-                             p_lbs_c_evt->params.button.button_state);
+                NRF_LOG_DEBUG("Link 0x%x, Button state changed on peer to 0x%x",
+                              p_lbs_c_evt->conn_handle,
+                              p_lbs_c_evt->params.button.button_state);
                 // NRF_LOG_INFO("Button state changed on peer to 0x%x.", p_lbs_c_evt->params.button.button_state);
                 if (p_lbs_c_evt->params.button.button_state)
                 {
@@ -1114,23 +1194,23 @@ static void ble_its_c_evt_handler(ble_its_c_t *p_ble_its_c, ble_its_c_evt_t cons
         switch (p_ble_its_evt->evt_type)
         {
         case BLE_ITS_C_EVT_DISCOVERY_COMPLETE:
-                NRF_LOG_INFO("ITS Service: Discovery complete.");
+                NRF_LOG_DEBUG("ITS Service: Discovery complete.");
                 err_code = ble_its_c_handles_assign(p_ble_its_c, p_ble_its_evt->conn_handle, &p_ble_its_evt->handles);
                 APP_ERROR_CHECK(err_code);
 
-                NRF_LOG_INFO("ble_its_c_tx_notif_enable.");
+                NRF_LOG_DEBUG("ble_its_c_tx_notif_enable.");
                 err_code = ble_its_c_tx_notif_enable(p_ble_its_c);
                 APP_ERROR_CHECK(err_code);
 
-                NRF_LOG_INFO("ble_its_c_img_info_notif_enable.");
+                NRF_LOG_DEBUG("ble_its_c_img_info_notif_enable.");
                 err_code = ble_its_c_img_info_notif_enable(p_ble_its_c);
                 APP_ERROR_CHECK(err_code);
 
-                NRF_LOG_INFO("Connected to device with Nordic ITS Service.");
+                NRF_LOG_DEBUG("Connected to device with Nordic ITS Service.");
                 break;
 
         case BLE_ITS_C_EVT_ITS_RX_EVT:
-                NRF_LOG_INFO("BLE_ITS_C_EVT_ITS_RX_EVT");
+                NRF_LOG_DEBUG("BLE_ITS_C_EVT_ITS_RX_EVT");
                 break;
 
         case BLE_ITS_C_EVT_ITS_TX_EVT:
@@ -1142,7 +1222,7 @@ static void ble_its_c_evt_handler(ble_its_c_t *p_ble_its_c, ble_its_c_evt_t cons
                 break;
 
         case BLE_ITS_C_EVT_DISCONNECTED:
-                NRF_LOG_INFO("Disconnected.");
+                NRF_LOG_DEBUG("Disconnected.");
                 //scan_start();
                 break;
         }
@@ -1254,7 +1334,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
         switch (pin_no)
         {
         case LEDBUTTON_BUTTON:
-                NRF_LOG_INFO("Send button state change.");
+                NRF_LOG_DEBUG("Send button state change.");
                 err_code = ble_lbs_on_button_change(m_conn_handle, &m_lbs, button_action);
                 if (err_code != NRF_SUCCESS &&
                     err_code != BLE_ERROR_INVALID_CONN_HANDLE &&
@@ -1264,6 +1344,21 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
                         APP_ERROR_CHECK(err_code);
                 }
                 break;
+        case ADV_BUTTON:
+                NRF_LOG_INFO("Start advertising!");
+                advertising_start();
+                break;
+
+        case SCAN_BUTTON:
+                NRF_LOG_INFO("Start Scanning!!");
+                scan_start();
+                break;
+
+        case PRINT_BUTTON:
+                NRF_LOG_INFO("Show connection summary!");
+                print_connection_status();
+                break;
+
 
         default:
                 APP_ERROR_HANDLER(pin_no);
@@ -1281,7 +1376,10 @@ static void buttons_init(void)
         //The array must be static because a pointer to it will be saved in the button handler module.
         static app_button_cfg_t buttons[] =
         {
-                {LEDBUTTON_BUTTON, false, BUTTON_PULL, button_event_handler}
+                {LEDBUTTON_BUTTON, false, BUTTON_PULL, button_event_handler},
+                {ADV_BUTTON, false, BUTTON_PULL, button_event_handler},
+                {SCAN_BUTTON, false, BUTTON_PULL, button_event_handler},
+                {PRINT_BUTTON, false, BUTTON_PULL, button_event_handler},
         };
 
         err_code = app_button_init(buttons, ARRAY_SIZE(buttons),
@@ -1357,13 +1455,10 @@ int main(void)
         its_c_init();
 
         // Start execution.
-        NRF_LOG_INFO("Channel Map Update Example : Peripheral LBS + NUS + ITS.");
-
-        NRF_LOG_INFO("Start advertising!");
+        NRF_LOG_INFO("Multi-Role Example Start!!");
+        scan_start();
         advertising_start();
 
-        NRF_LOG_INFO("Start Scanning!!");
-        scan_start();
 
         // Enter main loop.
         for (;;)

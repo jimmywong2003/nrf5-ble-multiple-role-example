@@ -627,7 +627,7 @@
 
 //==========================================================
 #ifndef BLE_ITS_CONFIG_LOG_ENABLED
-#define BLE_ITS_CONFIG_LOG_ENABLED 1
+#define BLE_ITS_CONFIG_LOG_ENABLED 0
 #endif
 
 // <o> BLE_ITS_CONFIG_LOG_LEVEL  - Default Severity level
@@ -7738,7 +7738,7 @@
 // <4=> Debug
 
 #ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 4
+#define NRF_LOG_DEFAULT_LEVEL 3
 #endif
 
 // <q> NRF_LOG_DEFERRED  - Enable deffered logger.
