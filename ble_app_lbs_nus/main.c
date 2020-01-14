@@ -234,11 +234,11 @@ static void gap_params_init(void)
         err_code = sd_ble_gap_ppcp_set(&gap_conn_params);
         APP_ERROR_CHECK(err_code);
 
-//        ble_gap_addr_t ble_address = {.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC,
-//                                      .addr_id_peer = 0,
-//                                      .addr = {0xC3,0x11,0x99,0x33,0x44,0xFF}};
-//        err_code = sd_ble_gap_addr_set(&ble_address);
-//        APP_ERROR_CHECK(err_code);
+        ble_gap_addr_t ble_address = {.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC,
+                                      .addr_id_peer = 0,
+                                      .addr = {0xC3,0x11,0x99,0x33,0x44,0xFF}};
+        err_code = sd_ble_gap_addr_set(&ble_address);
+        APP_ERROR_CHECK(err_code);
 }
 
 
@@ -354,7 +354,6 @@ static void advertising_init(void)
         advdata.include_appearance = true;
         advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
-
         memset(&srdata, 0, sizeof(srdata));
         srdata.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
         srdata.uuids_complete.p_uuids  = adv_uuids;
@@ -452,7 +451,7 @@ void uart_event_handle(app_uart_evt_t * p_event)
                                         }
                                 } while (err_code == NRF_ERROR_RESOURCES);
                         }
-                        // app_uart_flush();
+                        app_uart_flush();
                         index = 0;
                 }
 

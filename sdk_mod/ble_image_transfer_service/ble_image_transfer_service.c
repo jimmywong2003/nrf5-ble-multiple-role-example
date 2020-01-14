@@ -374,6 +374,10 @@ static uint32_t push_data_packets()
         NRF_LOG_INFO("%d", count++);
         while(return_code == NRF_SUCCESS)
         {
+                if (file_pos > file_size)
+                {
+                        break;
+                }
                 if((file_size - file_pos) > packet_length)
                 {
                         packet_size = packet_length;

@@ -275,6 +275,7 @@ void ble_nus_c_on_ble_evt(ble_evt_t const * p_ble_evt, void * p_context)
                         ble_nus_c_evt_t nus_c_evt;
 
                         nus_c_evt.evt_type = BLE_NUS_C_EVT_DISCONNECTED;
+                        nus_c_evt.conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 
                         p_ble_nus_c->conn_handle = BLE_CONN_HANDLE_INVALID;
                         p_ble_nus_c->evt_handler(p_ble_nus_c, &nus_c_evt);

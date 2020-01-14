@@ -66,15 +66,17 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="61" y="858" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="0" top="843" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="26" y="7632" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="7730" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1425" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="1413" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="629" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="621" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="99" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/util/app_error_weak.c" selected="0" top="89" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="68" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/ble/ble_services/ble_nus_c/ble_nus_c.h" selected="0" top="46" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="80" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/util/nordic_common.h" selected="0" top="52" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="42" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../sdk_mod/ble_image_transfer_service_c/ble_image_transfer_service_c.c" selected="0" top="19" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="305" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/ble/nrf_ble_scan/nrf_ble_scan.h" selected="0" top="291" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="16" y="139" useTextEdit="1" useBinaryEdit="0" left="0" path="ble_app_lbs_nus_its_multi_role_pca10040_s132.emProject" selected="0" top="129" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="189" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/softdevice/s132/headers/ble_gap.h" selected="1" top="177" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="139" useTextEdit="1" useBinaryEdit="0" left="0" path="ble_app_lbs_nus_its_multi_role_pca10040_s132.emProject" selected="0" top="129" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="189" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/softdevice/s132/headers/ble_gap.h" selected="0" top="177" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="136" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/log/src/nrf_log_internal.h" selected="0" top="136" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="49" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../sdk_mod/ble_image_transfer_service/ble_image_transfer_service.c" selected="0" top="33" codecName="Default"/>
  </Files>
- <ARMCrossStudioWindow activeProject="ble_app_lbs_nus_its_multi_role_pca10040_s132" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" debugSearchFileMap="" fileDialogInitialDirectory="" debugSearchPath="" autoConnectCapabilities="3711"/>
+ <ARMCrossStudioWindow activeProject="ble_app_lbs_nus_its_multi_role_pca10040_s132" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>
